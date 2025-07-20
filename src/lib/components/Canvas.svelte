@@ -61,15 +61,17 @@
 
     // Toggle drawing on and grab line stroke's starting position
     function startMouseDraw(event: MouseEvent) {
-        //
         // If undo point is not at end of strokes array, wipe all data after it
-        //
+        strokes.splice(undoPointer);
 
+        // Enable drawing mode
         isDrawing = true;
 
+        // Initialize brush stroke position to wherever the mouse has clicked
         prevMouseX = event.x - offsetX;
         prevMouseY = event.y - offsetY;
 
+        // Add stroke start position to stroke
         currentStroke.push({ x: prevMouseX, y: prevMouseY });
     }
 
@@ -95,14 +97,20 @@
 
     // Toggle drawing off when mouse is released
     function endDraw() {
-        isDrawing = false;
+        if (isDrawing) {
+            isDrawing = false;
 
-        // Append the current stroke to the array of all strokes and reset current stroke array for use with next stroke
-        strokes.push(currentStroke);
-        currentStroke = [];
+            // Append the current stroke to the array of all strokes (if a stroke was actually made and it was not just a click)
+            if (currentStroke.length > 2) {
+                strokes.push(currentStroke);
 
-        // Move undo pointer to the end of strokes
-        undoPointer = strokes.length;
+                // Move undo pointer to the end of strokes
+                undoPointer = strokes.length;
+            }
+
+            // Wipe the current stroke point data to reuse the array for the next stroke
+            currentStroke = [];
+        }
     }
 
     // Move undo pointer back one (if possible)
@@ -165,15 +173,14 @@
 </script>
 
 <!-- Update offset whenever the window's size is changed -->
-<svelte:window onresize={setOffset} {onkeydown} />
-
-<canvas
-    {width}
-    {height}
-    bind:this={canvas}
+<!-- And Handle drawing as mouse is pressed and moved around the window -->
+<svelte:window
+    onresize={setOffset}
+    {onkeydown}
     onmousedown={startMouseDraw}
-    onmousemove={mouseDraw}
     onmouseup={endDraw}
-    class="bg-white rounded-md"
->
+    onmousemove={mouseDraw}
+/>
+
+<canvas {width} {height} bind:this={canvas} class="bg-white rounded-md">
 </canvas>
