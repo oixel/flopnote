@@ -4,7 +4,7 @@
 
 <div class="flex flex-col h-[100vh] overflow-hidden">
     <h1
-        class="text-2xl font-medium bg-blue-900 text-white min-w-120 text-center py-3"
+        class="text-2xl font-medium bg-blue-900 text-white min-w-120 text-center py-3 select-none"
     >
         Welcome to flopnote!
     </h1>
