@@ -1,9 +1,15 @@
 <script lang="ts">
-  import Canvas from "$lib/components/Canvas.svelte";
+    import Canvas from "$lib/components/Canvas.svelte";
 
+//   Define canvas dimensions
+  const canvasWidth = 500;
+  const canvasHeight = 500;
+
+//   Reactive variables relating to the brush / eraser
   let isBrush = $state(true);
   let brushSize = $state(3);
   let eraserSize = $state(6);
+  let brushColor = $state("#000000");
 
   function onkeydown(event: KeyboardEvent) {
     switch (event.key) {
@@ -38,12 +44,38 @@
     Welcome to flopnote!
   </h1>
   <div class="flex justify-center items-center bg-blue-200 h-full grow">
+    <div class="grow w-full flex flex-col items-end">
+      <!-- Displays currently selected tool and its size -->
+      <p class="select-none text-center pr-4">
+        <b>Tool:</b>
+        {isBrush ? "Brush" : "Eraser"}<br /> <b>Size: </b>
+        {brushSize}px
+      </p>
+    </div>
     <Canvas
-      width={500}
-      height={500}
+      width={canvasWidth}
+      height={canvasHeight}
       {isBrush}
-      brushColor={"#000000"}
+      {brushColor}
       brushSize={isBrush ? brushSize : eraserSize}
     />
+    <div
+      class="grow w-full h-[{canvasHeight}px] flex flex-col justify-start items-start"
+    >
+      <div
+        class="w-9/10 max-w-48 p-2 mx-auto md:mx-2 flex flex-col rounded-md border-2 bg-white"
+      >
+        <input
+          type="color"
+          bind:value={brushColor}
+          class="w-full h-full rounded-xl aspect-square style cursor-pointer border-solid hover:scale-102 transition-all duration-100"
+        />
+        <input
+          type="text"
+          class="w-full text-center pt-1"
+          bind:value={brushColor}
+        />
+      </div>
+    </div>
   </div>
 </div>
