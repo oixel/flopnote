@@ -32,6 +32,7 @@
   interface Stroke {
     isBrush: boolean;
     brushSize: number;
+    brushColor: string;
     x: number;
     y: number;
   }
@@ -61,11 +62,12 @@
     prevY: number,
     x: number,
     y: number,
-    lineWidth: number
+    lineWidth: number,
+    lineColor: string
   ) {
     // Apply stroke's current brush attributes before drawing out the stroke
     context.lineWidth = lineWidth;
-    context.strokeStyle = brushColor;
+    context.strokeStyle = lineColor;
 
     // Ensure that the brush is round
     context.lineCap = "round";
@@ -97,7 +99,7 @@
     prevMouseY = event.y - offsetY;
 
     // Add stroke start position to stroke
-    currentStroke.push({ isBrush, brushSize, x: prevMouseX, y: prevMouseY });
+    currentStroke.push({ isBrush, brushSize, brushColor, x: prevMouseX, y: prevMouseY });
   }
 
   // Handles drawing as mouse moves around canvas
@@ -109,7 +111,7 @@
       const y = event.y - offsetY;
 
       // Draw out line from previous mouse position to current mouse position
-      if (isBrush) draw(prevMouseX, prevMouseY, x, y, brushSize);
+      if (isBrush) draw(prevMouseX, prevMouseY, x, y, brushSize, brushColor);
       else erase(x, y, brushSize);
 
       // Update previous mouse position
@@ -117,7 +119,7 @@
       prevMouseY = y;
 
       // Append the new points to the array of points form the current stroke
-      currentStroke.push({ isBrush, brushSize, x, y });
+      currentStroke.push({ isBrush, brushSize, brushColor, x, y });
     }
   }
 
@@ -178,7 +180,7 @@
 
         if (stroke[j].isBrush) {
           // Draw a line stroke from the previous mouse position to the current mouse position
-          draw(prevX, prevY, x, y, stroke[j].brushSize);
+          draw(prevX, prevY, x, y, stroke[j].brushSize, stroke[j].brushColor);
         } else {
           // Or erase at the current position if eraser is enabled
           erase(x, y, stroke[j].brushSize);
