@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { json } from "@sveltejs/kit";
   import { onMount } from "svelte";
 
   let {
@@ -29,6 +30,8 @@
   let isHovering = $state(false);
   let hoverPos = $state({ x: 0, y: 0 });
 
+  let canvasPosition = { x: 0, y: 0 };
+
   interface Stroke {
     isBrush: boolean;
     brushSize: number;
@@ -44,6 +47,10 @@
   onMount(() => {
     // Initialize 2D context of canvas to allow for drawing
     context = canvas.getContext("2d") as CanvasRenderingContext2D;
+
+    // Initialize canvas with white background
+    context.fillStyle = "#ffffff"
+    context.fillRect(0, 0, width, height);
 
     // Initialize canvas' offset
     setOffset();
@@ -99,7 +106,13 @@
     prevMouseY = event.y - offsetY;
 
     // Add stroke start position to stroke
-    currentStroke.push({ isBrush, brushSize, brushColor, x: prevMouseX, y: prevMouseY });
+    currentStroke.push({
+      isBrush,
+      brushSize,
+      brushColor,
+      x: prevMouseX,
+      y: prevMouseY,
+    });
   }
 
   // Handles drawing as mouse moves around canvas
@@ -192,34 +205,62 @@
     }
   }
 
+  interface PixelColor {
+    r: number;
+    g: number;
+    b: number;
+    a: number;
+  }
+
+  //
+  function getPixelColor(
+    imageData: ImageData,
+    pixelPosition: number
+  ): PixelColor {
+    const data = imageData.data;
+
+    return {
+      r: data[pixelPosition],
+      g: data[pixelPosition + 1],
+      b: data[pixelPosition + 2],
+      a: data[pixelPosition + 3],
+    };
+  }
+
+  //
+  function compareColors(color1: PixelColor, color2: PixelColor) {
+    return JSON.stringify(color1) === JSON.stringify(color2);
+  }
+
+  //
+  function fillPixel(
+    imageData: ImageData,
+    pixelPosition: number,
+    color: PixelColor
+  ) {
+    imageData.data[pixelPosition] = color.r;
+    imageData.data[pixelPosition + 1] = color.g;
+    imageData.data[pixelPosition + 2] = color.b;
+    imageData.data[pixelPosition + 3] = color.a;
+  }
+
   function bucket() {
-    // let pixelStack = [[0, 0]];
+    const imageData = context.getImageData(0, 0, width, height);
 
-    // while (pixelStack.length) {
-    //   var newPos, x, y, pixelPos, reachLeft, reachRight;
-    //   newPos = pixelStack.pop();
+    let newImageData = new ImageData(imageData.width, imageData.height);
 
-    //   x = newPos[0];
-    //   y = newPos[1];
+    const startPixelColor = getPixelColor(
+      imageData,
+      (canvasPosition.y * width + canvasPosition.x) * 4
+    );
 
-    //   pixelPos = (y * width + x) * 4;
-
-    //   while (y-- >= drawingBoundTop && matchStartColor(pixelPos)) {
-    //     pixelPos -= canvasWidth * 4;
-    //   }
-    // }
-
-    let newImageData: ImageData = new ImageData(width, height);
-
-    for (let i = 0; i < newImageData.data.length; i += 4) {
-      newImageData.data[i] = 255;
-      newImageData.data[i + 1] = 0;
-      newImageData.data[i + 2] = 0;
-      newImageData.data[i + 3] = 255;
+    for (let i = 0; i < imageData.data.length; i += 4) {
+      const currPixelColor = getPixelColor(imageData, i);
+      if (compareColors(currPixelColor, startPixelColor)) fillPixel(newImageData, i, {r: 255, g: 0, b: 0, a: 255});
+      else fillPixel(newImageData, i, currPixelColor);
     }
 
     context.putImageData(newImageData, 0, 0);
-    
   }
 
   // Handles keyboard shortcut for the Canvas
@@ -239,6 +280,8 @@
           break;
       }
     }
+
+    if (event.key == "g") bucket();
   }
 </script>
 
@@ -282,6 +325,10 @@
     // Turn off brush hovering when mouse exits the canvas' bounds
     isHovering = false;
   }}
-  class="bg-white rounded-md cursor-none select-none"
+  onmousemove={(event: MouseEvent) => {
+    // Update the mouse's position relative to the canvas
+    canvasPosition = { x: event.offsetX, y: event.offsetY };
+  }}
+  class="rounded-md cursor-none select-none"
 >
 </canvas>
