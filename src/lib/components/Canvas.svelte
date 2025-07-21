@@ -25,7 +25,8 @@
   let prevMouseX: number;
   let prevMouseY: number;
 
-  let isHovering = $state(true);
+  //   Allows for brush hovering while mouse is over canvas
+  let isHovering = $state(false);
   let hoverPos = $state({ x: 0, y: 0 });
 
   interface Stroke {
@@ -35,11 +36,12 @@
     y: number;
   }
 
-  let undoPointer: number = 0;
+  let undoPointer: number = 0; // Tracks how far back we have undone (gets set to end of array whenever a new stroke is added)
   let currentStroke: Array<Stroke> = [];
   let strokes: Array<Array<Stroke>> = [];
 
   onMount(() => {
+    // Initialize 2D context of canvas to allow for drawing
     context = canvas.getContext("2d") as CanvasRenderingContext2D;
 
     // Initialize canvas' offset
@@ -221,6 +223,7 @@
 <!-- Track mouse position to place brush hover where mouse is -->
 <svelte:document onmousemove={handleMouseHover} />
 
+<!-- Renders brush/eraser wherever mouse is hovering on canvas-->
 <div
   style={`
         left: ${hoverPos.x}px;
@@ -250,10 +253,3 @@
   class="bg-white rounded-md cursor-none select-none"
 >
 </canvas>
-
-<!-- Displays currently selected tool and its size -->
-<p class="absolute left-8 select-none text-center">
-  <b>Tool:</b>
-  {isBrush ? "Brush" : "Eraser"}<br /> <b>Size: </b>
-  {brushSize}px
-</p>
