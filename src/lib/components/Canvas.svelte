@@ -25,6 +25,9 @@
   let prevMouseX: number;
   let prevMouseY: number;
 
+  let isHovering = $state(true);
+  let hoverPos = $state({ x: 0, y: 0 });
+
   interface Stroke {
     isBrush: boolean;
     brushSize: number;
@@ -39,10 +42,6 @@
   onMount(() => {
     context = canvas.getContext("2d") as CanvasRenderingContext2D;
 
-    // Initialize brush attributes to current brush values
-    context.strokeStyle = brushColor;
-    context.lineWidth = brushSize;
-
     // Initialize canvas' offset
     setOffset();
   });
@@ -56,22 +55,29 @@
 
   // Draw a line stroke from the previous mouse position to the current mouse position
   function draw(
-    lineWidth: number,
     prevX: number,
     prevY: number,
     x: number,
-    y: number
+    y: number,
+    lineWidth: number
   ) {
+    // Apply stroke's current brush attributes before drawing out the stroke
     context.lineWidth = lineWidth;
+    context.strokeStyle = brushColor;
+
+    // Ensure that the brush is round
+    context.lineCap = "round";
+
+    // Draw out the brush stroke!
     context.beginPath();
     context.moveTo(prevX, prevY);
     context.lineTo(x, y);
-    context.closePath();
     context.stroke();
   }
 
-  function erase(lineWidth: number, x: number, y: number) {
-    context.clearRect(x, y, lineWidth * 2, lineWidth * 2);
+  //   Called when eraser is used to draw; wipes the points under the eraser!
+  function erase(x: number, y: number, lineWidth: number) {
+    context.clearRect(x, y, lineWidth, lineWidth);
   }
 
   // Toggle drawing on and grab line stroke's starting position
@@ -92,8 +98,6 @@
     currentStroke.push({ isBrush, brushSize, x: prevMouseX, y: prevMouseY });
   }
 
-  let hoverStyle = $state("");
-
   // Handles drawing as mouse moves around canvas
   function mouseDraw(event: MouseEvent) {
     // Only draw line strokes if mouse is held down
@@ -103,8 +107,8 @@
       const y = event.y - offsetY;
 
       // Draw out line from previous mouse position to current mouse position
-      if (isBrush) draw(brushSize, prevMouseX, prevMouseY, x, y);
-      else erase(brushSize, x, y);
+      if (isBrush) draw(prevMouseX, prevMouseY, x, y, brushSize);
+      else erase(x, y, brushSize);
 
       // Update previous mouse position
       prevMouseX = x;
@@ -133,13 +137,11 @@
     }
   }
 
-  let mousePosX = $state(0);
-  let mousePosY = $state(0);
-
+  // Provides brush hovering support for wherever the mouse is located
   function handleMouseHover(event: MouseEvent) {
-    // Provides hovering support
-    mousePosX = event.x;
-    mousePosY = event.y;
+    // Apply an offset if brush is being used instead of eraser (due to how brush draws)
+    let brushOffset = isBrush ? (brushSize / 2) * Number(isBrush) : 0;
+    hoverPos = { x: event.x - brushOffset, y: event.y - brushOffset };
   }
 
   // Move undo pointer back one (if possible)
@@ -172,9 +174,11 @@
         const x = stroke[j].x;
         const y = stroke[j].y;
 
-        if (stroke[j].isBrush) {  // Draw a line stroke from the previous mouse position to the current mouse position
+        if (stroke[j].isBrush) {
+          // Draw a line stroke from the previous mouse position to the current mouse position
           draw(prevX, prevY, x, y, stroke[j].brushSize);
-        } else {  // Or erase at the current position if eraser is enabled
+        } else {
+          // Or erase at the current position if eraser is enabled
           erase(x, y, stroke[j].brushSize);
         }
 
@@ -214,17 +218,19 @@
   onmousemove={mouseDraw}
 />
 
+<!-- Track mouse position to place brush hover where mouse is -->
 <svelte:document onmousemove={handleMouseHover} />
 
 <div
   style={`
-        left: ${mousePosX - brushSize * (2 * Number(isBrush))}px;
-        top: ${mousePosY - brushSize * (2 * Number(isBrush))}px; 
-        width: ${brushSize * 2 + Number(isBrush)}px; 
-        height: ${brushSize * 2 + Number(isBrush)}px;
+        left: ${hoverPos.x}px;
+        top: ${hoverPos.y}px; 
+        width: ${brushSize}px; 
+        height: ${brushSize}px;
         background-color: ${isBrush ? brushColor : "#ffffff"};
+        border-radius: ${isBrush ? "50%" : "0"};
     `}
-  class="absolute {isBrush ? 'rounded-[50%]' : 'rounded-0'} {!isBrush
+  class="{isHovering ? 'visible' : 'hidden'} absolute {!isBrush
     ? 'border-1'
     : ''} select-none pointer-events-none"
 ></div>
@@ -233,8 +239,21 @@
   {width}
   {height}
   bind:this={canvas}
+  onmouseenter={() => {
+    // Only allow brush hovering while cursor is in the bounds of the canvas
+    isHovering = true;
+  }}
+  onmouseleave={() => {
+    // Turn off brush hovering when mouse exits the canvas' bounds
+    isHovering = false;
+  }}
   class="bg-white rounded-md cursor-none select-none"
 >
 </canvas>
 
-<p class="absolute left-12 select-none">{isBrush ? "Brush" : "Eraser"}</p>
+<!-- Displays currently selected tool and its size -->
+<p class="absolute left-8 select-none text-center">
+  <b>Tool:</b>
+  {isBrush ? "Brush" : "Eraser"}<br /> <b>Size: </b>
+  {brushSize}px
+</p>
