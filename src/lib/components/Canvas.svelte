@@ -1,196 +1,240 @@
 <script lang="ts">
-    import { onMount } from "svelte";
+  import { onMount } from "svelte";
 
-    let {
-        width,
-        height,
-        isBrush,
-        brushColor,
-        brushWidth,
-    }: {
-        width: number;
-        height: number;
-        isBrush: boolean;
-        brushColor: string;
-        brushWidth: number;
-    } = $props();
+  let {
+    width,
+    height,
+    isBrush,
+    brushColor,
+    brushSize,
+  }: {
+    width: number;
+    height: number;
+    isBrush: boolean;
+    brushColor: string;
+    brushSize: number;
+  } = $props();
 
-    let canvas: HTMLCanvasElement;
-    let context: CanvasRenderingContext2D;
+  let canvas: HTMLCanvasElement;
+  let context: CanvasRenderingContext2D;
 
-    // Variables relating to active drawing
-    let isDrawing = false;
-    let offsetX: number;
-    let offsetY: number;
-    let prevMouseX: number;
-    let prevMouseY: number;
+  // Variables relating to active drawing
+  let isDrawing = false;
+  let offsetX: number;
+  let offsetY: number;
+  let prevMouseX: number;
+  let prevMouseY: number;
 
-    interface Stroke {
-        isBrush: boolean;
-        x: number;
-        y: number;
+  interface Stroke {
+    isBrush: boolean;
+    brushSize: number;
+    x: number;
+    y: number;
+  }
+
+  let undoPointer: number = 0;
+  let currentStroke: Array<Stroke> = [];
+  let strokes: Array<Array<Stroke>> = [];
+
+  onMount(() => {
+    context = canvas.getContext("2d") as CanvasRenderingContext2D;
+
+    // Initialize brush attributes to current brush values
+    context.strokeStyle = brushColor;
+    context.lineWidth = brushSize;
+
+    // Initialize canvas' offset
+    setOffset();
+  });
+
+  // Ensures that mouse pointer is correctly offset to within the Canvas element
+  function setOffset() {
+    const rect = canvas.getBoundingClientRect();
+    offsetX = rect.x;
+    offsetY = rect.y;
+  }
+
+  // Draw a line stroke from the previous mouse position to the current mouse position
+  function draw(
+    lineWidth: number,
+    prevX: number,
+    prevY: number,
+    x: number,
+    y: number
+  ) {
+    context.lineWidth = lineWidth;
+    context.beginPath();
+    context.moveTo(prevX, prevY);
+    context.lineTo(x, y);
+    context.closePath();
+    context.stroke();
+  }
+
+  function erase(lineWidth: number, x: number, y: number) {
+    context.clearRect(x, y, lineWidth * 2, lineWidth * 2);
+  }
+
+  // Toggle drawing on and grab line stroke's starting position
+  function startMouseDraw(event: MouseEvent) {
+    // If undo point is not at end of strokes array, wipe all data after it
+    strokes.splice(undoPointer);
+
+    context.lineWidth = brushSize;
+
+    // Enable drawing mode
+    isDrawing = true;
+
+    // Initialize brush stroke position to wherever the mouse has clicked
+    prevMouseX = event.x - offsetX;
+    prevMouseY = event.y - offsetY;
+
+    // Add stroke start position to stroke
+    currentStroke.push({ isBrush, brushSize, x: prevMouseX, y: prevMouseY });
+  }
+
+  let hoverStyle = $state("");
+
+  // Handles drawing as mouse moves around canvas
+  function mouseDraw(event: MouseEvent) {
+    // Only draw line strokes if mouse is held down
+    if (isDrawing) {
+      // Grab current mouse position with consideration for offset
+      const x = event.x - offsetX;
+      const y = event.y - offsetY;
+
+      // Draw out line from previous mouse position to current mouse position
+      if (isBrush) draw(brushSize, prevMouseX, prevMouseY, x, y);
+      else erase(brushSize, x, y);
+
+      // Update previous mouse position
+      prevMouseX = x;
+      prevMouseY = y;
+
+      // Append the new points to the array of points form the current stroke
+      currentStroke.push({ isBrush, brushSize, x, y });
     }
+  }
 
-    let undoPointer: number = 0;
-    let currentStroke: Array<Stroke> = [];
-    let strokes: Array<Array<Stroke>> = [];
+  // Toggle drawing off when mouse is released
+  function endDraw() {
+    if (isDrawing) {
+      isDrawing = false;
 
-    onMount(() => {
-        context = canvas.getContext("2d") as CanvasRenderingContext2D;
+      // Append the current stroke to the array of all strokes (if a stroke was actually made and it was not just a click)
+      if (currentStroke.length > 2) {
+        strokes.push(currentStroke);
 
-        // Initialize brush attributes to current brush values
-        context.strokeStyle = brushColor;
-        context.lineWidth = brushWidth;
+        // Move undo pointer to the end of strokes
+        undoPointer = strokes.length;
+      }
 
-        // Initialize canvas' offset
-        setOffset();
-    });
-
-    // Ensures that mouse pointer is correctly offset to within the Canvas element
-    function setOffset() {
-        const rect = canvas.getBoundingClientRect();
-        offsetX = rect.x;
-        offsetY = rect.y;
+      // Wipe the current stroke point data to reuse the array for the next stroke
+      currentStroke = [];
     }
+  }
 
-    // Draw a line stroke from the previous mouse position to the current mouse position
-    function draw(prevX: number, prevY: number, x: number, y: number) {
-        context.beginPath();
-        context.moveTo(prevX, prevY);
-        context.lineTo(x, y);
-        context.closePath();
-        context.stroke();
-    }
+  let mousePosX = $state(0);
+  let mousePosY = $state(0);
 
-    function erase(x: number, y: number) {
-        context.clearRect(x, y, brushWidth * 2, brushWidth * 2);
-    }
+  function handleMouseHover(event: MouseEvent) {
+    // Provides hovering support
+    mousePosX = event.x;
+    mousePosY = event.y;
+  }
 
-    // Toggle drawing on and grab line stroke's starting position
-    function startMouseDraw(event: MouseEvent) {
-        // If undo point is not at end of strokes array, wipe all data after it
-        strokes.splice(undoPointer);
+  // Move undo pointer back one (if possible)
+  function undo() {
+    if (undoPointer) --undoPointer;
+    render();
+  }
 
-        // Enable drawing mode
-        isDrawing = true;
+  // Move undo pointer forward one (if possible)
+  function redo() {
+    if (undoPointer < strokes.length) ++undoPointer;
+    render();
+  }
 
-        // Initialize brush stroke position to wherever the mouse has clicked
-        prevMouseX = event.x - offsetX;
-        prevMouseY = event.y - offsetY;
+  // Takes all currently drawn lines and places them onto the screen
+  function render() {
+    // Wipe all strokes on canvas
+    context.clearRect(0, 0, canvas.width, canvas.height);
 
-        // Add stroke start position to stroke
-        currentStroke.push({ isBrush, x: prevMouseX, y: prevMouseY });
-    }
+    // Render out every single brush stroke
+    for (let i = 0; i < undoPointer; i++) {
+      const stroke = strokes[i];
 
-    // Handles drawing as mouse moves around canvas
-    function mouseDraw(event: MouseEvent) {
-        // Only draw line strokes if mouse is held down
-        if (isDrawing) {
-            // Grab current mouse position with consideration for offset
-            const x = event.x - offsetX;
-            const y = event.y - offsetY;
+      // Grab initial brush stroke point
+      let prevX = stroke[0].x;
+      let prevY = stroke[0].y;
 
-            // Draw out line from previous mouse position to current mouse position
-            if (isBrush) draw(prevMouseX, prevMouseY, x, y);
-            else erase(x, y);
+      // Render out every single point for the current stroke
+      for (let j = 1; j < stroke.length; j++) {
+        const x = stroke[j].x;
+        const y = stroke[j].y;
 
-            // Update previous mouse position
-            prevMouseX = x;
-            prevMouseY = y;
-
-            // Append the new points to the array of points form the current stroke
-            currentStroke.push({ isBrush, x, y });
+        if (stroke[j].isBrush) {  // Draw a line stroke from the previous mouse position to the current mouse position
+          draw(prevX, prevY, x, y, stroke[j].brushSize);
+        } else {  // Or erase at the current position if eraser is enabled
+          erase(x, y, stroke[j].brushSize);
         }
+
+        prevX = x;
+        prevY = y;
+      }
     }
+  }
 
-    // Toggle drawing off when mouse is released
-    function endDraw() {
-        if (isDrawing) {
-            isDrawing = false;
+  // Handles keyboard shortcut for the Canvas
+  function onkeydown(event: KeyboardEvent) {
+    if (event.ctrlKey) {
+      switch (event.key.toLowerCase()) {
+        case "z":
+          // Allows for undo and redo with Ctrl+Z and Ctrl+Shift+Z
+          if (!event.shiftKey) undo();
+          else redo();
 
-            // Append the current stroke to the array of all strokes (if a stroke was actually made and it was not just a click)
-            if (currentStroke.length > 2) {
-                strokes.push(currentStroke);
+          break;
+        case "y":
+          // Allows for redo functionality with Ctrl+Y
+          redo();
 
-                // Move undo pointer to the end of strokes
-                undoPointer = strokes.length;
-            }
-
-            // Wipe the current stroke point data to reuse the array for the next stroke
-            currentStroke = [];
-        }
+          break;
+      }
     }
-
-    // Move undo pointer back one (if possible)
-    function undo() {
-        if (undoPointer) --undoPointer;
-        render();
-    }
-
-    // Move undo pointer forward one (if possible)
-    function redo() {
-        if (undoPointer < strokes.length) ++undoPointer;
-        render();
-    }
-
-    // Takes all currently drawn lines and places them onto the screen
-    function render() {
-        // Wipe all strokes on canvas
-        context.clearRect(0, 0, canvas.width, canvas.height);
-
-        // Render out every single brush stroke
-        for (let i = 0; i < undoPointer; i++) {
-            const stroke = strokes[i];
-
-            // Grab initial brush stroke point
-            let prevX = stroke[0].x;
-            let prevY = stroke[0].y;
-
-            // Render out every single point for the current stroke
-            for (let j = 1; j < stroke.length; j++) {
-                const x = stroke[j].x;
-                const y = stroke[j].y;
-
-                if (stroke[j].isBrush) draw(prevX, prevY, x, y);  // Draw a line stroke from the previous mouse position to the current mouse position
-                else erase(x, y);  // Or erase at the current position
-
-                prevX = x;
-                prevY = y;
-            }
-        }
-    }
-
-    // Handles keyboard shortcut for the Canvas
-    function onkeydown(event: KeyboardEvent) {
-        if (event.ctrlKey) {
-            switch (event.key.toLowerCase()) {
-                case "z":
-                    // Allows for undo and redo with Ctrl+Z and Ctrl+Shift+Z
-                    if (!event.shiftKey) undo();
-                    else redo();
-
-                    break;
-                case "y":
-                    // Allows for redo functionality with Ctrl+Y
-                    redo();
-
-                    break;
-            }
-        }
-    }
+  }
 </script>
 
 <!-- Update offset whenever the window's size is changed -->
 <!-- And Handle drawing as mouse is pressed and moved around the window -->
 <svelte:window
-    onresize={setOffset}
-    {onkeydown}
-    onmousedown={startMouseDraw}
-    onmouseup={endDraw}
-    onmousemove={mouseDraw}
+  onresize={setOffset}
+  {onkeydown}
+  onmousedown={startMouseDraw}
+  onmouseup={endDraw}
+  onmousemove={mouseDraw}
 />
 
-<canvas {width} {height} bind:this={canvas} class="bg-white rounded-md">
+<svelte:document onmousemove={handleMouseHover} />
+
+<div
+  style={`
+        left: ${mousePosX - brushSize * (2 * Number(isBrush))}px;
+        top: ${mousePosY - brushSize * (2 * Number(isBrush))}px; 
+        width: ${brushSize * 2 + Number(isBrush)}px; 
+        height: ${brushSize * 2 + Number(isBrush)}px;
+        background-color: ${isBrush ? brushColor : "#ffffff"};
+    `}
+  class="absolute {isBrush ? 'rounded-[50%]' : 'rounded-0'} {!isBrush
+    ? 'border-1'
+    : ''} select-none pointer-events-none"
+></div>
+
+<canvas
+  {width}
+  {height}
+  bind:this={canvas}
+  class="bg-white rounded-md cursor-none select-none"
+>
 </canvas>
 
-<p class="absolute left-12">{(isBrush) ? "Brush" : "Eraser"}</p>
+<p class="absolute left-12 select-none">{isBrush ? "Brush" : "Eraser"}</p>
