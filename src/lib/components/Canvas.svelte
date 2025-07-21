@@ -192,6 +192,36 @@
     }
   }
 
+  function bucket() {
+    // let pixelStack = [[0, 0]];
+
+    // while (pixelStack.length) {
+    //   var newPos, x, y, pixelPos, reachLeft, reachRight;
+    //   newPos = pixelStack.pop();
+
+    //   x = newPos[0];
+    //   y = newPos[1];
+
+    //   pixelPos = (y * width + x) * 4;
+
+    //   while (y-- >= drawingBoundTop && matchStartColor(pixelPos)) {
+    //     pixelPos -= canvasWidth * 4;
+    //   }
+    // }
+
+    let newImageData: ImageData = new ImageData(width, height);
+
+    for (let i = 0; i < newImageData.data.length; i += 4) {
+      newImageData.data[i] = 255;
+      newImageData.data[i + 1] = 0;
+      newImageData.data[i + 2] = 0;
+      newImageData.data[i + 3] = 255;
+    }
+
+    context.putImageData(newImageData, 0, 0);
+    
+  }
+
   // Handles keyboard shortcut for the Canvas
   function onkeydown(event: KeyboardEvent) {
     if (event.ctrlKey) {
