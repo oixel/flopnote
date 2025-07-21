@@ -7,8 +7,8 @@ To run basic Svelte project use `npm run dev` to run in application (Tauri) mode
   - [x] Drawing
   - [x] Erasing
 - [ ] Paint bucket tool (flood fill algorithm)
-- [ ] Add different brush settings
-  - [ ] Brush colors
+- [x] Add different brush settings
+  - [x] Brush colors
   - [x] Brush sizes
 - [x] Add brush hovering over canvas
 - [ ] Add layer support (max of 10 layers + 1 background)
