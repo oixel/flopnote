@@ -2,11 +2,15 @@
     import Canvas from "$lib/components/Canvas.svelte";
 
     let isBrush = $state(true);
+    let brushSize = $state(3);
 
     function onkeydown(event: KeyboardEvent) {
         // Allows enabling brush with 'b' or eraser with 'e'
         if (event.key == "b") isBrush = true;
         else if (event.key == "e") isBrush = false;
+        
+        if (event.key == "ArrowUp") brushSize++;
+        else if (event.key == "ArrowDown") brushSize--;
     }
 </script>
 
@@ -24,7 +28,7 @@
             height={500}
             isBrush={isBrush}
             brushColor={"#000000"}
-            brushWidth={3}
+            brushSize={brushSize}
         />
     </div>
 </div>
