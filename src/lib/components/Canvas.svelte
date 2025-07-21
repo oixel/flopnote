@@ -4,11 +4,13 @@
     let {
         width,
         height,
+        isBrush,
         brushColor,
         brushWidth,
     }: {
         width: number;
         height: number;
+        isBrush: boolean;
         brushColor: string;
         brushWidth: number;
     } = $props();
@@ -24,6 +26,7 @@
     let prevMouseY: number;
 
     interface Stroke {
+        isBrush: boolean;
         x: number;
         y: number;
     }
@@ -59,6 +62,10 @@
         context.stroke();
     }
 
+    function erase(x: number, y: number) {
+        context.clearRect(x, y, brushWidth * 2, brushWidth * 2);
+    }
+
     // Toggle drawing on and grab line stroke's starting position
     function startMouseDraw(event: MouseEvent) {
         // If undo point is not at end of strokes array, wipe all data after it
@@ -72,7 +79,7 @@
         prevMouseY = event.y - offsetY;
 
         // Add stroke start position to stroke
-        currentStroke.push({ x: prevMouseX, y: prevMouseY });
+        currentStroke.push({ isBrush, x: prevMouseX, y: prevMouseY });
     }
 
     // Handles drawing as mouse moves around canvas
@@ -84,14 +91,15 @@
             const y = event.y - offsetY;
 
             // Draw out line from previous mouse position to current mouse position
-            draw(prevMouseX, prevMouseY, x, y);
+            if (isBrush) draw(prevMouseX, prevMouseY, x, y);
+            else erase(x, y);
 
             // Update previous mouse position
             prevMouseX = x;
             prevMouseY = y;
 
             // Append the new points to the array of points form the current stroke
-            currentStroke.push({ x, y });
+            currentStroke.push({ isBrush, x, y });
         }
     }
 
@@ -143,8 +151,8 @@
                 const x = stroke[j].x;
                 const y = stroke[j].y;
 
-                // Draw a line stroke from the previous mouse position to the current mouse position
-                draw(prevX, prevY, x, y);
+                if (stroke[j].isBrush) draw(prevX, prevY, x, y);  // Draw a line stroke from the previous mouse position to the current mouse position
+                else erase(x, y);  // Or erase at the current position
 
                 prevX = x;
                 prevY = y;
@@ -184,3 +192,5 @@
 
 <canvas {width} {height} bind:this={canvas} class="bg-white rounded-md">
 </canvas>
+
+<p class="absolute left-12">{(isBrush) ? "Brush" : "Eraser"}</p>

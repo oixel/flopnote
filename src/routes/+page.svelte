@@ -1,6 +1,16 @@
 <script lang="ts">
     import Canvas from "$lib/components/Canvas.svelte";
+
+    let isBrush = $state(true);
+
+    function onkeydown(event: KeyboardEvent) {
+        // Allows enabling brush with 'b' or eraser with 'e'
+        if (event.key == "b") isBrush = true;
+        else if (event.key == "e") isBrush = false;
+    }
 </script>
+
+<svelte:window {onkeydown} />
 
 <div class="flex flex-col h-[100vh] overflow-hidden">
     <h1
@@ -12,6 +22,7 @@
         <Canvas
             width={500}
             height={500}
+            isBrush={isBrush}
             brushColor={"#000000"}
             brushWidth={3}
         />
