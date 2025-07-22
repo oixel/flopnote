@@ -1,6 +1,7 @@
 <script lang="ts">
   import { json } from "@sveltejs/kit";
   import { onMount } from "svelte";
+  import { linear } from "svelte/easing";
 
   let {
     width,
@@ -49,7 +50,7 @@
     context = canvas.getContext("2d") as CanvasRenderingContext2D;
 
     // Initialize canvas with white background
-    context.fillStyle = "#ffffff"
+    context.fillStyle = "#ffffff";
     context.fillRect(0, 0, width, height);
 
     // Initialize canvas' offset
@@ -205,64 +206,6 @@
     }
   }
 
-  interface PixelColor {
-    r: number;
-    g: number;
-    b: number;
-    a: number;
-  }
-
-  //
-  function getPixelColor(
-    imageData: ImageData,
-    pixelPosition: number
-  ): PixelColor {
-    const data = imageData.data;
-
-    return {
-      r: data[pixelPosition],
-      g: data[pixelPosition + 1],
-      b: data[pixelPosition + 2],
-      a: data[pixelPosition + 3],
-    };
-  }
-
-  //
-  function compareColors(color1: PixelColor, color2: PixelColor) {
-    return JSON.stringify(color1) === JSON.stringify(color2);
-  }
-
-  //
-  function fillPixel(
-    imageData: ImageData,
-    pixelPosition: number,
-    color: PixelColor
-  ) {
-    imageData.data[pixelPosition] = color.r;
-    imageData.data[pixelPosition + 1] = color.g;
-    imageData.data[pixelPosition + 2] = color.b;
-    imageData.data[pixelPosition + 3] = color.a;
-  }
-
-  function bucket() {
-    const imageData = context.getImageData(0, 0, width, height);
-
-    let newImageData = new ImageData(imageData.width, imageData.height);
-
-    const startPixelColor = getPixelColor(
-      imageData,
-      (canvasPosition.y * width + canvasPosition.x) * 4
-    );
-
-    for (let i = 0; i < imageData.data.length; i += 4) {
-      const currPixelColor = getPixelColor(imageData, i);
-      if (compareColors(currPixelColor, startPixelColor)) fillPixel(newImageData, i, {r: 255, g: 0, b: 0, a: 255});
-      else fillPixel(newImageData, i, currPixelColor);
-    }
-
-    context.putImageData(newImageData, 0, 0);
-  }
-
   // Handles keyboard shortcut for the Canvas
   function onkeydown(event: KeyboardEvent) {
     if (event.ctrlKey) {
@@ -281,7 +224,98 @@
       }
     }
 
-    if (event.key == "g") bucket();
+    if (event.key == "g")
+      bucketFill(canvasPosition.x, canvasPosition.y, brushColor);
+  }
+
+  function bucketFill(x: number, y: number, color: string) {
+    let pixelStack = [{ x, y }];
+    let pixels = context.getImageData(0, 0, width, height);
+    var linearCoord = (y * width + x) * 4;
+    let startColor = {
+      r: pixels.data[linearCoord],
+      g: pixels.data[linearCoord + 1],
+      b: pixels.data[linearCoord + 2],
+      a: pixels.data[linearCoord + 3],
+    };
+
+    // Prevent filling a color if it already matches
+    if (startColor.r == 255 && startColor.g == 0 && startColor.b == 0 && startColor.a == 255) return;
+
+    while (pixelStack.length > 0) {
+      let newPixel = pixelStack.pop();
+
+      if (typeof newPixel === "undefined") return;
+
+      x = newPixel.x;
+      y = newPixel.y;
+
+      linearCoord = (y * width + x) * 4;
+
+      while (
+        y-- >= 0 &&
+        pixels.data[linearCoord] == startColor.r &&
+        pixels.data[linearCoord + 1] == startColor.g &&
+        pixels.data[linearCoord + 2] == startColor.b &&
+        pixels.data[linearCoord + 3] == startColor.a
+      ) {
+        linearCoord -= width * 4;
+      }
+
+      linearCoord += width * 4;
+      y++;
+
+      var reachedLeft = false;
+      var reachedRight = false;
+      while (
+        y++ < height &&
+        pixels.data[linearCoord] == startColor.r &&
+        pixels.data[linearCoord + 1] == startColor.g &&
+        pixels.data[linearCoord + 2] == startColor.b &&
+        pixels.data[linearCoord + 3] == startColor.a
+      ) {
+        pixels.data[linearCoord] = 255;
+        pixels.data[linearCoord + 1] = 0;
+        pixels.data[linearCoord + 2] = 0;
+        pixels.data[linearCoord + 3] = 255;
+
+        if (x > 0) {
+          if (
+            pixels.data[linearCoord - 4] == startColor.r &&
+            pixels.data[linearCoord - 4 + 1] == startColor.g &&
+            pixels.data[linearCoord - 4 + 2] == startColor.b &&
+            pixels.data[linearCoord - 4 + 3] == startColor.a
+          ) {
+            if (!reachedLeft) {
+              pixelStack.push({ x: x - 1, y });
+              reachedLeft = true;
+            }
+          } else if (reachedLeft) {
+            reachedLeft = false;
+          }
+        }
+
+        if (x < width - 1) {
+          if (
+            pixels.data[linearCoord + 4] == startColor.r &&
+            pixels.data[linearCoord + 4 + 1] == startColor.g &&
+            pixels.data[linearCoord + 4 + 2] == startColor.b &&
+            pixels.data[linearCoord + 4 + 3] == startColor.a
+          ) {
+            if (!reachedRight) {
+              pixelStack.push({ x: x + 1, y });
+              reachedRight = true;
+            }
+          } else if (reachedRight) {
+            reachedRight = false;
+          }
+        }
+
+        linearCoord += width * 4;
+      }
+    }
+
+    context.putImageData(pixels, 0, 0);
   }
 </script>
 
