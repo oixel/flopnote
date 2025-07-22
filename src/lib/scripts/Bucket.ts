@@ -1,61 +1,10 @@
-//
-class Color {
-  r: number;
-  g: number;
-  b: number;
-  a: number;
-
-  constructor(r: number, g: number, b: number, a: number) {
-    this.r = r;
-    this.g = g;
-    this.b = b;
-    this.a = a;
-  }
-}
-
-//
-function hexToColor(hex: string, alpha: number): Color {
-  //
-  hex.replace("#", "");
-
-  const red = parseInt(hex.substring(1, 3), 16);
-  const green = parseInt(hex.substring(3, 5), 16);
-  const blue = parseInt(hex.substring(5, 7), 16);
-
-  return new Color(red, green, blue, alpha);
-}
-
-//
-function getColor(imageData: ImageData, coord: number): Color {
-  const data = imageData.data;
-
-  return new Color(
-    data[coord],
-    data[coord + 1],
-    data[coord + 2],
-    data[coord + 3]
-  );
-}
-
-//
-function setColor(imageData: ImageData, coord: number, color: Color): void {
-  const data = imageData.data;
-
-  data[coord] = color.r;
-  data[coord + 1] = color.g;
-  data[coord + 2] = color.b;
-  data[coord + 3] = color.a;
-}
-
-//
-function compareColors(colorA: Color, colorB: Color): boolean {
-  return (
-    colorA.r === colorB.r &&
-    colorA.g === colorB.g &&
-    colorA.b === colorB.b &&
-    colorA.a === colorB.a
-  );
-}
+import {
+  Color,
+  hexToColor,
+  getColor,
+  setColor,
+  compareColors,
+} from "$lib/scripts/ColorTools";
 
 // A combined iterative / recursive flood fill algorithm based on https://www.williammalone.com/articles/html5-canvas-javascript-paint-bucket-tool/
 export function bucketFill(
@@ -64,52 +13,60 @@ export function bucketFill(
   y: number,
   color: string
 ): void {
-  const width = canvas.width;
-  const height = canvas.height;
-  const context = canvas.getContext("2d") as CanvasRenderingContext2D;
+  const width: number = canvas.width;
+  const height: number = canvas.height;
+  const context: CanvasRenderingContext2D = canvas.getContext(
+    "2d"
+  ) as CanvasRenderingContext2D;
 
-  const pixelStack = [{ x, y }];
+  const pixelStack: Array<{ x: number; y: number }> = [{ x, y }];
   const imageData = context.getImageData(0, 0, width, height);
 
-  // Represents the pixel's coordinate in the linear array of image data
+  // Represents the pixel's coordinate (x, y) as a *linear* coordinate in the *linear* array of image data
   // Note: each value follows the structure of [red, green, blue, alpha, red, ...]
-  let coord = (y * width + x) * 4;
+  let coord: number = (y * width + x) * 4;
 
-  const startColor = getColor(imageData, coord);
-  const fillColor = hexToColor(color, 255);
+  const startColor: Color = getColor(imageData, coord);
+  const fillColor: Color = hexToColor(color, 255);
 
   // Prevent filling a color if it already matches
   if (compareColors(startColor, fillColor)) return;
 
-  //
+  // Loops through all pixels that match the color of the start pixel
   while (pixelStack.length > 0) {
-    const newPixel = pixelStack.pop() as { x: number; y: number };
+    // Move to the next pixel in stack
+    const newPixel: { x: number; y: number } = pixelStack.pop() as {
+      x: number;
+      y: number;
+    };
 
     x = newPixel.x;
     y = newPixel.y;
 
+    // Convert new pixel's regular coordinate position, to a *linear* coordinate
     coord = (y * width + x) * 4;
 
-    //
+    // Move to furthest upwards point that matches the starting color
     while (y-- >= 0 && compareColors(getColor(imageData, coord), startColor)) {
       coord -= width * 4;
     }
 
-    //
     coord += width * 4;
-    y++;
+    y += 1;
 
-    //
-    let reachedLeft = false;
-    let reachedRight = false;
+    // Prevent looping past furthest left / right point
+    let reachedLeft: boolean = false;
+    let reachedRight: boolean = false;
 
-    // 
+    // Move downwards as long as the pixel's color is the same as the starting color
     while (
       y++ < height &&
       compareColors(getColor(imageData, coord), startColor)
     ) {
+      // Fill the current pixel with the fill color!
       setColor(imageData, coord, fillColor);
 
+      // Move as far left as possible before a different colored pixel is reached
       if (x > 0) {
         if (compareColors(getColor(imageData, coord - 4), startColor)) {
           if (!reachedLeft) {
@@ -121,6 +78,7 @@ export function bucketFill(
         }
       }
 
+      // Move as far right as possible before a different colored pixel is reached
       if (x < width - 1) {
         if (compareColors(getColor(imageData, coord + 4), startColor)) {
           if (!reachedRight) {
@@ -132,10 +90,11 @@ export function bucketFill(
         }
       }
 
+      // Move down one pixel!
       coord += width * 4;
     }
   }
 
-  //
+  // Take the newly filled image data and push it to the canvas!
   context.putImageData(imageData, 0, 0);
 }
