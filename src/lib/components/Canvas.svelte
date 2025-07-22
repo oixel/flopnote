@@ -1,7 +1,5 @@
 <script lang="ts">
-  import { json } from "@sveltejs/kit";
   import { onMount } from "svelte";
-  import { linear } from "svelte/easing";
 
   let {
     width,
