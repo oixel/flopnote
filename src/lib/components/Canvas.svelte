@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
 
+  import { Command, CommandHandler } from "$lib/scripts/CommandHandler";
   import { bucketFill } from "$lib/scripts/Bucket";
 
   let {
@@ -45,6 +46,16 @@
   let currentStroke: Array<Stroke> = [];
   let strokes: Array<Array<Stroke>> = [];
 
+  let allImageData: Array<ImageData> = [];
+  let imageDataPointer = 0;
+
+  function updateImageData() {
+    const prevImageData: ImageData = context.getImageData(0, 0, width, height);
+    allImageData.push(prevImageData);
+    imageDataPointer = allImageData.length - 1;
+    console.log(imageDataPointer)
+  }
+
   onMount(() => {
     // Initialize 2D context of canvas to allow for drawing
     context = canvas.getContext("2d") as CanvasRenderingContext2D;
@@ -55,6 +66,9 @@
 
     // Initialize canvas' offset
     setOffset();
+
+    //
+    updateImageData();
   });
 
   // Ensures that mouse pointer is correctly offset to within the Canvas element
@@ -71,7 +85,7 @@
     x: number,
     y: number,
     lineWidth: number,
-    lineColor: string,
+    lineColor: string
   ) {
     // Apply stroke's current brush attributes before drawing out the stroke
     context.lineWidth = lineWidth;
@@ -94,8 +108,7 @@
 
   // Toggle drawing on and grab line stroke's starting position
   function startMouseDraw(event: MouseEvent) {
-    // If undo point is not at end of strokes array, wipe all data after it
-    strokes.splice(undoPointer);
+   if (imageDataPointer != allImageData.length - 1) allImageData.splice(imageDataPointer + 1);
 
     context.lineWidth = brushSize;
 
@@ -106,16 +119,15 @@
     prevMouseX = event.x - offsetX;
     prevMouseY = event.y - offsetY;
 
-    // Add initial brush stroke to canvas
-    draw(prevMouseX, prevMouseY, prevMouseX, prevMouseY, brushSize, brushColor);
-
-    currentStroke.push({
-      isBrush,
+    // Add initial brush stroke to canvas by cheesing the canvas `lineTo()` function (allows for dots)
+    draw(
+      prevMouseX,
+      prevMouseY,
+      prevMouseX + 0.001,
+      prevMouseY + 0.001,
       brushSize,
-      brushColor,
-      x: prevMouseX,
-      y: prevMouseY,
-    });
+      brushColor
+    );
   }
 
   // Handles drawing as mouse moves around canvas
@@ -133,9 +145,6 @@
       // Update previous mouse position
       prevMouseX = x;
       prevMouseY = y;
-
-      // Append the new points to the array of points form the current stroke
-      currentStroke.push({ isBrush, brushSize, brushColor, x, y });
     }
   }
 
@@ -150,22 +159,12 @@
 
       draw(prevMouseX, prevMouseY, x, y, brushSize, brushColor);
 
-      currentStroke.push({
-        isBrush,
-        brushSize,
-        brushColor,
-        x,
-        y,
-      });
+      updateImageData();
 
-      // Append the current brush stroke to the array of all strokes
-      strokes.push(currentStroke);
-
-      // Move undo pointer to the end of strokes
-      undoPointer = strokes.length;
-
-      // Wipe the current stroke point data to reuse the array for the next stroke
-      currentStroke = [];
+      // function run() {
+      //   context.putImageData(context.getImageData(0, 0, width, height), 0, 0);
+      // }
+      // const drawCommand = new Command(run undo)
     }
   }
 
@@ -178,52 +177,21 @@
 
   // Move undo pointer back one (if possible)
   function undo() {
-    if (undoPointer) --undoPointer;
+    if (imageDataPointer > 0) imageDataPointer -= 1;
+    console.log(imageDataPointer);
     render();
   }
 
   // Move undo pointer forward one (if possible)
   function redo() {
-    if (undoPointer < strokes.length) ++undoPointer;
+    if (imageDataPointer < allImageData.length - 1) imageDataPointer += 1;
+    console.log(imageDataPointer);
     render();
   }
 
   // Takes all currently drawn lines and places them onto the screen
   function render() {
-    // Wipe all strokes on canvas
-    context.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Render out every single brush stroke
-    for (let i = 0; i < undoPointer; i++) {
-      const stroke = strokes[i];
-
-      // Grab initial brush stroke point
-      let prevX = stroke[0].x;
-      let prevY = stroke[0].y;
-
-      // Initialize x and y to previous values so that the initial brush stroke is not lost
-      let x = prevX;
-      let y = prevY;
-
-      // Render out every single point for the current stroke
-      for (let j = 0; j < stroke.length; j++) {
-        if (stroke[j].isBrush) {
-          // Draw a line stroke from the previous mouse position to the current mouse position
-          draw(prevX, prevY, x, y, stroke[j].brushSize, stroke[j].brushColor);
-        } else {
-          // Or erase at the current position if eraser is enabled
-          erase(x, y, stroke[j].brushSize);
-        }
-
-        // Work is done with the current x and y, so we can store they can be stored as old values
-        prevX = x;
-        prevY = y;
-
-        // Update x and y to be the next points of the current brush stroke
-        x = stroke[j].x;
-        y = stroke[j].y;
-      }
-    }
+    context.putImageData(allImageData[imageDataPointer], 0, 0);
   }
 
   // Handles keyboard shortcut for the Canvas
