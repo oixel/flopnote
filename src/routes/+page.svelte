@@ -1,35 +1,29 @@
 <script lang="ts">
     import Canvas from "$lib/components/Canvas.svelte";
+  import { PaintBrush } from "$lib/scripts/Brushes";
 
 //   Define canvas dimensions
   const canvasWidth = 500;
   const canvasHeight = 500;
 
 //   Reactive variables relating to the brush / eraser
-  let isBrush = $state(true);
-  let brushSize = $state(3);
-  let eraserSize = $state(6);
-  let brushColor = $state("#000000");
+  let brush = $state(new PaintBrush('#000000', 3));
 
   function onkeydown(event: KeyboardEvent) {
     switch (event.key) {
       // Enables brush with 'b'
       case "b":
-        isBrush = true;
         break;
       // Enables eraser with 'e'
       case "e":
-        isBrush = false;
         break;
       // Increases current brush/eraser size with up arrow
       case "ArrowUp":
-        if (isBrush) brushSize++;
-        else eraserSize++;
+        brush.size++;
         break;
       // Decreases current brush/eraser size with down arrow
       case "ArrowDown":
-        if (isBrush && brushSize > 1) brushSize--;
-        else if (eraserSize > 1) eraserSize--;
+        brush.size++;
         break;
     }
   }
@@ -48,16 +42,15 @@
       <!-- Displays currently selected tool and its size -->
       <p class="select-none text-center pr-4">
         <b>Tool:</b>
-        {isBrush ? "Brush" : "Eraser"}<br /> <b>Size: </b>
-        {brushSize}px
+        {brush.name ? "Brush" : "Eraser"}<br /> <b>Size: </b>
+        {brush.size}px
       </p>
+      <input type="range" min=0 max=50 bind:value={brush.size} />
     </div>
     <Canvas
       width={canvasWidth}
       height={canvasHeight}
-      {isBrush}
-      {brushColor}
-      brushSize={isBrush ? brushSize : eraserSize}
+      {brush}
     />
     <div
       class="grow w-full h-[{canvasHeight}px] flex flex-col justify-start items-start"
@@ -67,13 +60,13 @@
       >
         <input
           type="color"
-          bind:value={brushColor}
+          bind:value={brush.color}
           class="w-full h-full rounded-xl aspect-square style cursor-pointer border-solid hover:scale-102 transition-all duration-100"
         />
         <input
           type="text"
           class="w-full text-center pt-1"
-          bind:value={brushColor}
+          bind:value={brush.color}
         />
       </div>
     </div>

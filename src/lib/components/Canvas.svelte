@@ -4,19 +4,16 @@
   import { CommandHandler } from "$lib/scripts/CommandHandler";
   import { RenderCommand } from "$lib/scripts/Commands";
   import { bucketFill } from "$lib/scripts/Bucket";
+  import type { Brush } from "$lib/scripts/Brushes";
 
   let {
     width,
     height,
-    isBrush,
-    brushColor,
-    brushSize,
+    brush
   }: {
     width: number;
     height: number;
-    isBrush: boolean;
-    brushColor: string;
-    brushSize: number;
+    brush: Brush;
   } = $props();
 
   let canvas: HTMLCanvasElement;
@@ -28,8 +25,6 @@
   let isDrawing = false;
   let offsetX: number;
   let offsetY: number;
-  let prevMouseX: number;
-  let prevMouseY: number;
 
   //   Allows for brush hovering while mouse is over canvas
   let isHovering = $state(false);
@@ -60,29 +55,6 @@
     offsetY = rect.y;
   }
 
-  // Draw a line stroke from the previous mouse position to the current mouse position
-  function draw(
-    prevX: number,
-    prevY: number,
-    x: number,
-    y: number,
-    lineWidth: number,
-    lineColor: string
-  ) {
-    // Apply stroke's current brush attributes before drawing out the stroke
-    context.lineWidth = lineWidth;
-    context.strokeStyle = lineColor;
-
-    // Ensure that the brush is round
-    context.lineCap = "round";
-
-    // Draw out the brush stroke!
-    context.beginPath();
-    context.moveTo(prevX, prevY);
-    context.lineTo(x, y);
-    context.stroke();
-  }
-
   //   Called when eraser is used to draw; wipes the points under the eraser!
   function erase(x: number, y: number, lineWidth: number) {
     context.clearRect(x, y, lineWidth, lineWidth);
@@ -90,25 +62,14 @@
 
   // Toggle drawing on and grab line stroke's starting position
   function startMouseDraw(event: MouseEvent) {
+    // 
     previousImageData = context.getImageData(0, 0, width, height);
-    context.lineWidth = brushSize;
 
     // Enable drawing mode
     isDrawing = true;
 
-    // Initialize brush stroke position to wherever the mouse has clicked
-    prevMouseX = event.x - offsetX;
-    prevMouseY = event.y - offsetY;
-
     // Add initial brush stroke to canvas by cheesing the canvas `lineTo()` function (allows for dots)
-    if (isBrush) draw(
-      prevMouseX,
-      prevMouseY,
-      prevMouseX + 0.001,
-      prevMouseY + 0.001,
-      brushSize,
-      brushColor
-    );
+    brush.draw(context, event.x, event.y);
   }
 
   // Handles drawing as mouse moves around canvas
@@ -119,13 +80,7 @@
       const x = event.x - offsetX;
       const y = event.y - offsetY;
 
-      // Draw out line from previous mouse position to current mouse position
-      if (isBrush) draw(prevMouseX, prevMouseY, x, y, brushSize, brushColor);
-      else erase(x, y, brushSize);
-
-      // Update previous mouse position
-      prevMouseX = x;
-      prevMouseY = y;
+      brush.draw(context, x, y);
     }
   }
 
@@ -138,7 +93,8 @@
       const x = event.x - offsetX;
       const y = event.y - offsetY;
 
-      draw(prevMouseX, prevMouseY, x, y, brushSize, brushColor);
+      brush.draw(context, x, y);
+      brush.stopDraw();
 
       // Append new brush strokes to command timeline
       const command = new RenderCommand(canvas, previousImageData);
@@ -149,7 +105,7 @@
   // Provides brush hovering support for wherever the mouse is located
   function handleMouseHover(event: MouseEvent) {
     // Apply an offset if brush is being used instead of eraser (due to how brush draws)
-    let brushOffset = isBrush ? (brushSize / 2) * Number(isBrush) : 0;
+    let brushOffset = brush.name == "Paint Brush" ? (brush.size / 2) * Number(brush.name == "Paint Brush") : 0;
     hoverPos = { x: event.x - brushOffset, y: event.y - brushOffset };
   }
 
@@ -172,7 +128,7 @@
     }
 
     if (event.key == "g")
-      bucketFill(canvas, canvasPosition.x, canvasPosition.y, brushColor);
+      bucketFill(canvas, canvasPosition.x, canvasPosition.y, brush.color);
   }
 </script>
 
@@ -194,14 +150,11 @@
   style={`
         left: ${hoverPos.x}px;
         top: ${hoverPos.y}px; 
-        width: ${brushSize}px; 
-        height: ${brushSize}px;
-        background-color: ${isBrush ? brushColor : "#ffffff"};
-        border-radius: ${isBrush ? "50%" : "0"};
+        width: ${brush.size}px; 
+        height: ${brush.size}px;
+        background-color: ${brush.color};
     `}
-  class="{isHovering ? 'visible' : 'hidden'} absolute {!isBrush
-    ? 'border-1'
-    : ''} select-none pointer-events-none"
+  class="{isHovering ? "visible" : "hidden"} {brush.hoverStyle} absolute select-none pointer-events-none"
 ></div>
 
 <canvas
