@@ -47,8 +47,8 @@
     // Initialize 2D context of canvas to allow for drawing
     context = canvas.getContext("2d") as CanvasRenderingContext2D;
 
-    // Initialize canvas with white background
-    context.fillStyle = "#ffffff";
+    // Initialize canvas with transparent background so that bucket can fill it
+    context.fillStyle = "rgba(0, 0, 0, 0)";
     context.fillRect(0, 0, width, height);
 
     // Initialize canvas' offset
@@ -69,7 +69,7 @@
     x: number,
     y: number,
     lineWidth: number,
-    lineColor: string
+    lineColor: string,
   ) {
     // Apply stroke's current brush attributes before drawing out the stroke
     context.lineWidth = lineWidth;
@@ -104,7 +104,9 @@
     prevMouseX = event.x - offsetX;
     prevMouseY = event.y - offsetY;
 
-    // Add stroke start position to stroke
+    // Add initial brush stroke to canvas
+    draw(prevMouseX, prevMouseY, prevMouseX, prevMouseY, brushSize, brushColor);
+
     currentStroke.push({
       isBrush,
       brushSize,
@@ -136,17 +138,29 @@
   }
 
   // Toggle drawing off when mouse is released
-  function endDraw() {
+  function endDraw(event: MouseEvent) {
     if (isDrawing) {
       isDrawing = false;
 
-      // Append the current stroke to the array of all strokes (if a stroke was actually made and it was not just a click)
-      if (currentStroke.length > 2) {
-        strokes.push(currentStroke);
+      // Add final points of brush stroke to canvas
+      const x = event.x - offsetX;
+      const y = event.y - offsetY;
 
-        // Move undo pointer to the end of strokes
-        undoPointer = strokes.length;
-      }
+      draw(prevMouseX, prevMouseY, x, y, brushSize, brushColor);
+
+      currentStroke.push({
+        isBrush,
+        brushSize,
+        brushColor,
+        x,
+        y,
+      });
+
+      // Append the current brush stroke to the array of all strokes
+      strokes.push(currentStroke);
+
+      // Move undo pointer to the end of strokes
+      undoPointer = strokes.length;
 
       // Wipe the current stroke point data to reuse the array for the next stroke
       currentStroke = [];
@@ -185,11 +199,12 @@
       let prevX = stroke[0].x;
       let prevY = stroke[0].y;
 
-      // Render out every single point for the current stroke
-      for (let j = 1; j < stroke.length; j++) {
-        const x = stroke[j].x;
-        const y = stroke[j].y;
+      // Initialize x and y to previous values so that the initial brush stroke is not lost
+      let x = prevX;
+      let y = prevY;
 
+      // Render out every single point for the current stroke
+      for (let j = 0; j < stroke.length; j++) {
         if (stroke[j].isBrush) {
           // Draw a line stroke from the previous mouse position to the current mouse position
           draw(prevX, prevY, x, y, stroke[j].brushSize, stroke[j].brushColor);
@@ -198,8 +213,13 @@
           erase(x, y, stroke[j].brushSize);
         }
 
+        // Work is done with the current x and y, so we can store they can be stored as old values
         prevX = x;
         prevY = y;
+
+        // Update x and y to be the next points of the current brush stroke
+        x = stroke[j].x;
+        y = stroke[j].y;
       }
     }
   }
@@ -361,6 +381,6 @@
     // Update the mouse's position relative to the canvas
     canvasPosition = { x: event.offsetX, y: event.offsetY };
   }}
-  class="rounded-md cursor-none select-none"
+  class="bg-white rounded-md cursor-none select-none"
 >
 </canvas>
