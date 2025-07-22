@@ -11,6 +11,8 @@ To run basic Svelte project use `npm run dev` to run in application (Tauri) mode
   - [x] Brush colors
   - [x] Brush sizes
 - [x] Add brush hovering over canvas
+- [ ] Proper undo / redo system (Command Handler)
+- [ ] Timelapse
 - [ ] Add layer support (max of 10 layers + 1 background)
 ## Basic Animation Functionality
 - [ ] Creation of new frames
@@ -22,3 +24,10 @@ To run basic Svelte project use `npm run dev` to run in application (Tauri) mode
 - [ ] Audio support
   - [ ] Audio recording
   - [ ] Audio importing
+- [ ] Selection tools
+  - [ ] Rectangle grab
+  - [ ] Lasso (???)
+- [ ] Shape tools
+  - [ ] Rectangle tool
+  - [ ] Circle Tool
+- [ ] Custom keybindings
