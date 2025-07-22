@@ -1,38 +1,35 @@
-export class Command {
-  run: VoidFunction;
-  undo: VoidFunction;
-
-  constructor(run: VoidFunction, undo: VoidFunction) {
-    this.run = run;
-    this.undo = undo;
-  }
-}
+import { Command } from "./Commands";
 
 export class CommandHandler {
-  undoPointer: number = 0;
+  pointer: number = 0;
   commands: Array<Command> = [];
 
+  // Appends new command to the commands timeline
   addCommand(command: Command) {
     // If undo point is not at end of commands array, wipe all data after it
-    this.commands.splice(this.undoPointer);
+    if (this.pointer != this.commands.length)
+      this.commands.splice(this.pointer);
 
+    // Append newly called command to timeline
     this.commands.push(command);
-    this.undoPointer = this.commands.length;
 
-    command.run();
+    // Ensure that pointer always points to the end of the timeline when a new command is appended
+    this.pointer = this.commands.length;
   }
 
-  run() {
-    if (this.undoPointer < this.commands.length) {
-      this.commands[this.undoPointer].run();
-      this.undoPointer++;
+  // Re-executes the current command and then moves to the next (if one exists)
+  redo() {
+    if (this.pointer < this.commands.length) {
+      this.commands[this.pointer].redo();
+      this.pointer += 1;
     }
   }
 
+  // Calls undo function on the previous command (if one exists)
   undo() {
-    if (this.undoPointer > 0) {
-      this.commands[this.undoPointer].run();
-      this.undoPointer--;
+    if (this.pointer > 0) {
+      this.pointer -= 1;
+      this.commands[this.pointer].undo();
     }
   }
 }

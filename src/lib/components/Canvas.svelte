@@ -1,7 +1,8 @@
 <script lang="ts">
   import { onMount } from "svelte";
 
-  import { Command, CommandHandler } from "$lib/scripts/CommandHandler";
+  import { CommandHandler } from "$lib/scripts/CommandHandler";
+  import { RenderCommand } from "$lib/scripts/Commands";
   import { bucketFill } from "$lib/scripts/Bucket";
 
   let {
@@ -21,6 +22,8 @@
   let canvas: HTMLCanvasElement;
   let context: CanvasRenderingContext2D;
 
+  const commandHandler = new CommandHandler();
+
   // Variables relating to active drawing
   let isDrawing = false;
   let offsetX: number;
@@ -34,27 +37,8 @@
 
   let canvasPosition = { x: 0, y: 0 };
 
-  interface Stroke {
-    isBrush: boolean;
-    brushSize: number;
-    brushColor: string;
-    x: number;
-    y: number;
-  }
-
-  let undoPointer: number = 0; // Tracks how far back we have undone (gets set to end of array whenever a new stroke is added)
-  let currentStroke: Array<Stroke> = [];
-  let strokes: Array<Array<Stroke>> = [];
-
-  let allImageData: Array<ImageData> = [];
-  let imageDataPointer = 0;
-
-  function updateImageData() {
-    const prevImageData: ImageData = context.getImageData(0, 0, width, height);
-    allImageData.push(prevImageData);
-    imageDataPointer = allImageData.length - 1;
-    console.log(imageDataPointer)
-  }
+  // Tracks the image data of the canvas before a new brush stroke occurs (used for undoing RenderCommand)
+  let previousImageData: ImageData;
 
   onMount(() => {
     // Initialize 2D context of canvas to allow for drawing
@@ -66,14 +50,12 @@
 
     // Initialize canvas' offset
     setOffset();
-
-    //
-    updateImageData();
   });
 
   // Ensures that mouse pointer is correctly offset to within the Canvas element
   function setOffset() {
     const rect = canvas.getBoundingClientRect();
+
     offsetX = rect.x;
     offsetY = rect.y;
   }
@@ -108,8 +90,7 @@
 
   // Toggle drawing on and grab line stroke's starting position
   function startMouseDraw(event: MouseEvent) {
-   if (imageDataPointer != allImageData.length - 1) allImageData.splice(imageDataPointer + 1);
-
+    previousImageData = context.getImageData(0, 0, width, height);
     context.lineWidth = brushSize;
 
     // Enable drawing mode
@@ -159,12 +140,9 @@
 
       draw(prevMouseX, prevMouseY, x, y, brushSize, brushColor);
 
-      updateImageData();
-
-      // function run() {
-      //   context.putImageData(context.getImageData(0, 0, width, height), 0, 0);
-      // }
-      // const drawCommand = new Command(run undo)
+      // Append new brush strokes to command timeline
+      const command = new RenderCommand(canvas, previousImageData);
+      commandHandler.addCommand(command);
     }
   }
 
@@ -175,38 +153,19 @@
     hoverPos = { x: event.x - brushOffset, y: event.y - brushOffset };
   }
 
-  // Move undo pointer back one (if possible)
-  function undo() {
-    if (imageDataPointer > 0) imageDataPointer -= 1;
-    console.log(imageDataPointer);
-    render();
-  }
-
-  // Move undo pointer forward one (if possible)
-  function redo() {
-    if (imageDataPointer < allImageData.length - 1) imageDataPointer += 1;
-    console.log(imageDataPointer);
-    render();
-  }
-
-  // Takes all currently drawn lines and places them onto the screen
-  function render() {
-    context.putImageData(allImageData[imageDataPointer], 0, 0);
-  }
-
   // Handles keyboard shortcut for the Canvas
   function onkeydown(event: KeyboardEvent) {
     if (event.ctrlKey) {
       switch (event.key.toLowerCase()) {
         case "z":
           // Allows for undo and redo with Ctrl+Z and Ctrl+Shift+Z
-          if (!event.shiftKey) undo();
-          else redo();
+          if (!event.shiftKey) commandHandler.undo();
+          else commandHandler.redo();
 
           break;
         case "y":
           // Allows for redo functionality with Ctrl+Y
-          redo();
+          commandHandler.redo();
 
           break;
       }
