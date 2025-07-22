@@ -101,7 +101,7 @@
     prevMouseY = event.y - offsetY;
 
     // Add initial brush stroke to canvas by cheesing the canvas `lineTo()` function (allows for dots)
-    draw(
+    if (isBrush) draw(
       prevMouseX,
       prevMouseY,
       prevMouseX + 0.001,
