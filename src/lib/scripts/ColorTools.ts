@@ -1,0 +1,64 @@
+// Creates a class that simplifies handling color data
+export class Color {
+  r: number;
+  g: number;
+  b: number;
+  a: number;
+
+  constructor(r: number, g: number, b: number, a: number) {
+    this.r = r;
+    this.g = g;
+    this.b = b;
+    this.a = a;
+  }
+}
+
+// Converts a hex string (used by color input) and alpha value into a Color object
+export function hexToColor(hex: string, alpha: number): Color {
+  // Remove hashtag if it is present in hex string
+  hex.replace("#", "");
+
+  //   Grab color data from string and convert it to a value from 0-255
+  const red = parseInt(hex.substring(1, 3), 16);
+  const green = parseInt(hex.substring(3, 5), 16);
+  const blue = parseInt(hex.substring(5, 7), 16);
+
+  //   Combine spliced values into a Color object
+  return new Color(red, green, blue, alpha);
+}
+
+// Returns a Color object of the pixel at the linear coordinate
+export function getColor(imageData: ImageData, coord: number): Color {
+  const data = imageData.data;
+
+  return new Color(
+    data[coord],
+    data[coord + 1],
+    data[coord + 2],
+    data[coord + 3]
+  );
+}
+
+// Update color of pixel at linear coordinate to passed-in color
+export function setColor(
+  imageData: ImageData,
+  coord: number,
+  color: Color
+): void {
+  const data = imageData.data;
+
+  data[coord] = color.r;
+  data[coord + 1] = color.g;
+  data[coord + 2] = color.b;
+  data[coord + 3] = color.a;
+}
+
+// Take two Color instances and compare them
+export function compareColors(colorA: Color, colorB: Color): boolean {
+  return (
+    colorA.r === colorB.r &&
+    colorA.g === colorB.g &&
+    colorA.b === colorB.b &&
+    colorA.a === colorB.a
+  );
+}
