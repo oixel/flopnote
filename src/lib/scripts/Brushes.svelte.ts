@@ -5,17 +5,17 @@ import { RenderCommand } from "./Commands";
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 export class Brush {
-  // Required brush attributes
   name: string;
 
-  // Optional brush attributes
   commandHandler?: CommandHandler;
-  size?: number = $state(undefined);
-  color?: string = $state(undefined);
-  hoverStyle?: string;
 
-  // Sets the mouse cursor's icon while hovering over canvas
-  cursor: string = "cursor-none";
+  size?: number = $state(undefined);  // Optiona: some brushes don't need a size (e.g. Bucket)
+  maxSize: number = 100;
+
+  color?: string = $state(undefined);  // Optional: some brushes don't need colors (e.g. Eraser)
+
+  cursor: string = "cursor-none";  // Sets the mouse cursor's icon while hovering over canvas
+  hoverStyle?: string;  // Appearance of brush while hovering over canvas
 
   previousImageData?: ImageData;
 
@@ -24,8 +24,9 @@ export class Brush {
     if (this.size) {
       this.size += change;
 
-      // Enforce a minimum brush size of 1
+      // Enforce a minimum and maximum for the brush size
       if (this.size < 1) this.size = 1;
+      else if (this.size > this.maxSize) this.size = this.maxSize;
     }
   }
 

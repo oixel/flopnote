@@ -106,7 +106,7 @@
     `}
   class="{isHovering
     ? 'visible'
-    : 'hidden'} {brush?.hoverStyle} absolute pointer-events-none"
+    : 'hidden'} {brush?.hoverStyle} fixed pointer-events-none"
 ></div>
 
 <canvas

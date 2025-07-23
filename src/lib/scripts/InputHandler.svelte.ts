@@ -68,7 +68,7 @@ export class InputHandler {
   onwheel(event: WheelEvent) {
     if (this.pressedKeys.includes("control")) {
       // Allows for Ctrl+Scroll to change brush size (if brush uses size)
-      if (event.deltaY > 0) this.brushHandler.brush?.changeSize(1);
+      if (event.deltaY < 0) this.brushHandler.brush?.changeSize(1);
       else this.brushHandler.brush?.changeSize(-1);
     }
   }

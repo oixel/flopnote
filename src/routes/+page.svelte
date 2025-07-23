@@ -54,7 +54,7 @@
             <input
               type="range"
               min="1"
-              max="50"
+              max={brush.maxSize}
               bind:value={brush.size}
               class="cursor-pointer"
             />
