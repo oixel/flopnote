@@ -4,7 +4,7 @@
   import { CommandHandler } from "$lib/scripts/CommandHandler";
   import { RenderCommand } from "$lib/scripts/Commands";
   import { bucketFill } from "$lib/scripts/Bucket";
-  import type { Brush } from "$lib/scripts/Brushes";
+  import type { Brush } from "$lib/scripts/Brushes.svelte";
 
   let {
     width,

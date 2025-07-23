@@ -1,13 +1,16 @@
 <script lang="ts">
-    import Canvas from "$lib/components/Canvas.svelte";
-  import { PaintBrush } from "$lib/scripts/Brushes";
+  import Canvas from "$lib/components/Canvas.svelte";
+  import { Brush, PaintBrush } from "$lib/scripts/Brushes.svelte";
 
-//   Define canvas dimensions
+  // Define canvas dimensions
   const canvasWidth = 500;
   const canvasHeight = 500;
 
-//   Reactive variables relating to the brush / eraser
-  let brush = $state(new PaintBrush('#000000', 3));
+  //
+  const paintBrush = new PaintBrush("#000000", 3);
+
+  // Reactive variable storing the currently selected brush / tool
+  let brush : Brush = $state(paintBrush);
 
   function onkeydown(event: KeyboardEvent) {
     switch (event.key) {
@@ -19,11 +22,11 @@
         break;
       // Increases current brush/eraser size with up arrow
       case "ArrowUp":
-        brush.size++;
+        brush.changeSize(1);
         break;
       // Decreases current brush/eraser size with down arrow
       case "ArrowDown":
-        brush.size++;
+        brush.changeSize(-1);
         break;
     }
   }
@@ -45,13 +48,9 @@
         {brush.name ? "Brush" : "Eraser"}<br /> <b>Size: </b>
         {brush.size}px
       </p>
-      <input type="range" min=0 max=50 bind:value={brush.size} />
+      <input type="range" min="1" max="50" bind:value={brush.size} />
     </div>
-    <Canvas
-      width={canvasWidth}
-      height={canvasHeight}
-      {brush}
-    />
+    <Canvas width={canvasWidth} height={canvasHeight} {brush} />
     <div
       class="grow w-full h-[{canvasHeight}px] flex flex-col justify-start items-start"
     >

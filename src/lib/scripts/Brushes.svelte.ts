@@ -1,20 +1,31 @@
 export class Brush {
   name: string;
-  color: string;
-  size: number;
+  color: string = $state("");
+  size: number = $state(0);
   hoverStyle: string;
 
-  // 
+  //
+  changeSize(change: number) {
+    this.size += change;
+    if (this.size <= 0) this.size = 1;
+  }
+
+  //
   draw(context: CanvasRenderingContext2D, x: number, y: number): void {
     console.log("Drawing on", context, "at", x, y);
   }
 
   //
-  stopDraw() : void {
+  stopDraw(): void {
     return;
   }
 
-  constructor(name: string, color: string, size: number, hoverStyle: string = "") {
+  constructor(
+    name: string,
+    color: string,
+    size: number,
+    hoverStyle: string = ""
+  ) {
     this.name = name;
     this.color = color;
     this.size = size;
@@ -28,7 +39,7 @@ export class PaintBrush extends Brush {
 
   // Draw a line stroke from the previous mouse position to the current mouse position
   draw(context: CanvasRenderingContext2D, x: number, y: number): void {
-    // 
+    //
     if (!this.prevX) this.prevX = x + 0.0001;
     if (!this.prevY) this.prevY = y + 0.0001;
 
@@ -55,7 +66,7 @@ export class PaintBrush extends Brush {
     this.prevY = null;
   }
 
-  constructor(color: string, size: number) {    
+  constructor(color: string, size: number) {
     super("Paint Brush", color, size, "rounded-full");
 
     this.prevX = null;
