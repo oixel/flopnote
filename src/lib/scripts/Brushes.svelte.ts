@@ -14,6 +14,13 @@ export class Brush {
 
   previousImageData?: ImageData;
 
+  // 
+  setSize(size: number): void {
+    if (this.usesSize) {
+      this.size = size;
+    }
+  }
+
   // Alter the brush's current size based on the parameter
   changeSize(change: number): void {
     if (this.usesSize) {
