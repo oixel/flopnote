@@ -36,7 +36,7 @@
       <!-- Tools to the left of the canvas -->
       <div class="grow w-full flex flex-col items-end">
         <div
-          class="w-9/10 max-w-40 p-2 mx-auto md:mx-2 flex flex-col justify-center items-center bg-blue-900 text-white rounded-md border-2 border-white text-center"
+          class="min-w-38 max-w-38 p-2 mx-auto md:mx-2 flex flex-col justify-center items-center bg-blue-900 text-white rounded-md border-2 border-white text-center"
         >
           <!-- Displays currently selected tool -->
           <p class="">

@@ -13,18 +13,17 @@ export function bucketFill(
   y: number,
   color: string
 ): void {
-  const width: number = canvas.width;
-  const height: number = canvas.height;
-  const context: CanvasRenderingContext2D = canvas.getContext(
-    "2d"
-  ) as CanvasRenderingContext2D;
+  console.log(x, y)
+  const width = canvas.width;
+  const height = canvas.height;
+  const context = canvas.getContext("2d") as CanvasRenderingContext2D;
 
-  const pixelStack: Array<{ x: number; y: number }> = [{ x, y }];
+  const pixelStack = [{ x, y }];
   const imageData = context.getImageData(0, 0, width, height);
 
   // Represents the pixel's coordinate (x, y) as a *linear* coordinate in the *linear* array of image data
   // Note: each value follows the structure of [red, green, blue, alpha, red, ...]
-  let coord: number = (y * width + x) * 4;
+  let coord = (y * width + x) * 4;
 
   const startColor: Color = getColor(imageData, coord);
   const fillColor: Color = hexToColor(color, 255);
@@ -35,10 +34,7 @@ export function bucketFill(
   // Loops through all pixels that match the color of the start pixel
   while (pixelStack.length > 0) {
     // Move to the next pixel in stack
-    const newPixel: { x: number; y: number } = pixelStack.pop() as {
-      x: number;
-      y: number;
-    };
+    const newPixel = pixelStack.pop() as { x: number; y: number };
 
     x = newPixel.x;
     y = newPixel.y;
@@ -55,8 +51,8 @@ export function bucketFill(
     y += 1;
 
     // Prevent looping past furthest left / right point
-    let reachedLeft: boolean = false;
-    let reachedRight: boolean = false;
+    let reachedLeft = false;
+    let reachedRight = false;
 
     // Move downwards as long as the pixel's color is the same as the starting color
     while (
