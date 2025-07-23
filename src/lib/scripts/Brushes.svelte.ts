@@ -4,6 +4,7 @@ import { RenderCommand } from "./Commands";
 /* eslint-disable @typescript-eslint/no-unused-vars */
 export class Brush {
   name: string;
+  usesColor: boolean;
   size: number = $state(0);
   color: string = $state("");
   hoverStyle: string;
@@ -38,6 +39,18 @@ export class Brush {
     return;
   }
 
+  // Grab image data BEFORE drawing, so it can be re-applied on RenderCommand's undo()
+  setPreviousImageData(canvas: HTMLCanvasElement): void {
+    const context = canvas.getContext("2d") as CanvasRenderingContext2D;
+
+    this.previousImageData = context.getImageData(
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
+  }
+
   // Append current draw command to the command timeline
   storeCommand(canvas: HTMLCanvasElement): void {
     // Append new brush strokes to command timeline
@@ -49,12 +62,14 @@ export class Brush {
 
   constructor(
     name: string,
+    usesColor: boolean,
     size: number,
     color: string,
     hoverStyle: string = "",
     commandHandler: CommandHandler
   ) {
     this.name = name;
+    this.usesColor = usesColor;
     this.size = size;
     this.color = color;
     this.hoverStyle = hoverStyle;
@@ -69,14 +84,7 @@ export class PaintBrush extends Brush {
 
   // Grab current image data and apply initial points of brush stroke
   startDraw(canvas: HTMLCanvasElement, x: number, y: number): void {
-    // Grab image data BEFORE this brush stroke, so it can be re-applied on RenderCommand's undo()
-    const context = canvas.getContext("2d") as CanvasRenderingContext2D;
-    this.previousImageData = context.getImageData(
-      0,
-      0,
-      canvas.width,
-      canvas.height
-    );
+    this.setPreviousImageData(canvas);
 
     // Apply a very miniscule difference so that initial "line" can be drawn
     this.prevX = x + 0.0001;
@@ -115,7 +123,7 @@ export class PaintBrush extends Brush {
   }
 
   constructor(size: number, color: string, commandHandler: CommandHandler) {
-    super("Paint Brush", size, color, "rounded-full", commandHandler);
+    super("Paint Brush", true, size, color, "rounded-full", commandHandler);
   }
 }
 
@@ -129,6 +137,7 @@ export class Eraser extends Brush {
 
   // Erase initial points under mouse
   startDraw(canvas: HTMLCanvasElement, x: number, y: number): void {
+    this.setPreviousImageData(canvas);
     this.erase(canvas, x, y);
   }
 
@@ -144,6 +153,6 @@ export class Eraser extends Brush {
   }
 
   constructor(size: number, commandHandler: CommandHandler) {
-    super("Eraser", size, "", "border-2", commandHandler);
+    super("Eraser", false, size, "", "border-2 bg-white", commandHandler);
   }
 }

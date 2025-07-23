@@ -47,11 +47,11 @@
           brush = eraser;
           break;
         // Increases current brush/eraser size with up arrow
-        case "ArrowUp":
+        case "arrowup":
           brush.changeSize(1);
           break;
         // Decreases current brush/eraser size with down arrow
-        case "ArrowDown":
+        case "arrowdown":
           brush.changeSize(-1);
           break;
       }
@@ -70,11 +70,13 @@
   <div class="flex justify-center items-center bg-blue-200 h-full grow">
     <!-- Tools to the left of the canvas -->
     <div class="grow w-full flex flex-col items-end">
-      <div class="w-9/10 max-w-40 p-2 mx-auto md:mx-2 flex flex-col justify-center items-center bg-blue-900 text-white rounded-xl border-4 border-white">
+      <div
+        class="w-9/10 max-w-40 p-2 mx-auto md:mx-2 flex flex-col justify-center items-center bg-blue-900 text-white rounded-xl border-4 border-white"
+      >
         <!-- Displays currently selected tool and its size -->
-        <p class="select-none text-center pr-4">
+        <p class="select-none text-center">
           <b>Tool:</b>
-          {brush.name ? "Brush" : "Eraser"}<br /> <b>Size: </b>
+          {brush.name}<br /> <b>Size: </b>
           {brush.size}px
         </p>
         <input type="range" min="1" max="50" bind:value={brush.size} />
@@ -88,20 +90,22 @@
     <div
       class="grow w-full h-[{canvasHeight}px] flex flex-col justify-start items-start"
     >
-      <div
-        class="w-9/10 max-w-48 p-2 mx-auto md:mx-2 flex flex-col rounded-md border-2 bg-white"
-      >
-        <input
-          type="color"
-          bind:value={brush.color}
-          class="w-full h-full rounded-xl aspect-square style cursor-pointer border-solid hover:scale-102 transition-all duration-100"
-        />
-        <input
-          type="text"
-          class="w-full text-center pt-1"
-          bind:value={brush.color}
-        />
-      </div>
+      {#if brush.usesColor}
+        <div
+          class="w-9/10 max-w-48 p-2 mx-auto md:mx-2 flex flex-col rounded-md border-2 bg-white"
+        >
+          <input
+            type="color"
+            bind:value={brush.color}
+            class="w-full h-full rounded-xl aspect-square style cursor-pointer border-solid hover:scale-102 transition-all duration-100"
+          />
+          <input
+            type="text"
+            class="w-full text-center pt-1"
+            bind:value={brush.color}
+          />
+        </div>
+      {/if}
     </div>
   </div>
 </div>
