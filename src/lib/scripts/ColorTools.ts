@@ -54,9 +54,22 @@ export function getColor(imageData: ImageData, coord: number): Color {
   );
 }
 
+// Returns a Color object of the pixel at the given cartesian coordinate
+export function getColorXY(canvas: HTMLCanvasElement, x: number, y: number): Color {
+  const context = canvas.getContext('2d') as CanvasRenderingContext2D;
+  const imageData = context.getImageData(x, y, 1, 1).data;
+
+  return new Color(imageData[0], imageData[1], imageData[2], imageData[3]);
+}
+
 // Return a hex string representing the color of the pixel at the given linear coordinate
 export function getColorHex(imageData: ImageData, coord: number): string {
   return colorToHex(getColor(imageData, coord));
+}
+
+// Return a hex string represnting the color of the pixel at the given cartesian coordinate
+export function getColorHexXY(canvas: HTMLCanvasElement, x: number, y: number): string {
+  return colorToHex(getColorXY(canvas, x, y));
 }
 
 // Update color of pixel at linear coordinate to passed-in color

@@ -1,5 +1,5 @@
 import { bucketFill } from "./Bucket";
-import { getColor, getColorHex } from "./ColorTools";
+import { getColorHexXY, getColorXY } from "./ColorTools";
 import type { CommandHandler } from "./CommandHandler";
 import { RenderCommand } from "./Commands";
 
@@ -191,20 +191,10 @@ export class EyeDropper extends Brush {
 
   // Returns the hex color value of clicked pixel (or of background if clear pixel is clicked)
   startDraw(canvas: HTMLCanvasElement, x: number, y: number): string {
-    const context = canvas.getContext("2d") as CanvasRenderingContext2D;
-    const imageData = context.getImageData(
-      0,
-      0,
-      canvas.width,
-      canvas.height
-    ) as ImageData;
-    const coord = (y * canvas.width + x) * 4;
-    console.log(imageData.data[coord]);
-
     // Return clicked color if it is not clear
-    if (getColor(imageData, coord).a != 0) return getColorHex(imageData, coord);
+    if (getColorXY(canvas, x, y).a != 0) return getColorHexXY(canvas, x, y);
 
-    // Return background color if a clear pixel was clicked
+    // Otherwise, return background color if a clear pixel was clicked
     return this.backgroundColor;
   }
 
