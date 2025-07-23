@@ -14,7 +14,6 @@
   } = $props();
 
   let canvas: HTMLCanvasElement;
-  let context: CanvasRenderingContext2D;
 
   // Variables relating to active drawing
   let isDrawing = false;
@@ -27,18 +26,7 @@
 
   let canvasPosition = { x: 0, y: 0 };
 
-  // Tracks the image data of the canvas before a new brush stroke occurs (used for undoing RenderCommand)
-  let previousImageData: ImageData;
-
   onMount(() => {
-    // Initialize 2D context for the initial fill of the canvas
-    context = canvas.getContext("2d") as CanvasRenderingContext2D;
-
-    // Initialize canvas with transparent background so that bucket can fill it
-    context.fillStyle = "rgba(0, 0, 0, 0)";
-    context.fillRect(0, 0, width, height);
-
-    // Initialize canvas' offset
     setOffset();
   });
 
