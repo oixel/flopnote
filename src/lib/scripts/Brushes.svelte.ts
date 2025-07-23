@@ -1,27 +1,27 @@
+import { bucketFill } from "./Bucket";
 import type { CommandHandler } from "./CommandHandler";
 import { RenderCommand } from "./Commands";
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 export class Brush {
   name: string;
+  usesSize: boolean;
   usesColor: boolean;
+  commandHandler: CommandHandler;
   size: number = $state(0);
   color: string = $state("");
   hoverStyle: string;
-  commandHandler: CommandHandler;
+
   previousImageData?: ImageData;
 
   // Alter the brush's current size based on the parameter
   changeSize(change: number): void {
-    this.size += change;
+    if (this.usesSize) {
+      this.size += change;
 
-    // Enforce a minimum brush size of 1
-    if (this.size < 1) this.size = 1;
-  }
-
-  // Update the brush's current color
-  setColor(color: string): void {
-    this.color = color;
+      // Enforce a minimum brush size of 1
+      if (this.size < 1) this.size = 1;
+    }
   }
 
   // Called when mouse is first clicked inside of the canvas
@@ -62,18 +62,20 @@ export class Brush {
 
   constructor(
     name: string,
+    usesSize: boolean,
     usesColor: boolean,
+    commandHandler: CommandHandler,
     size: number,
     color: string,
-    hoverStyle: string = "",
-    commandHandler: CommandHandler
+    hoverStyle: string = ""
   ) {
     this.name = name;
+    this.usesSize = usesSize;
     this.usesColor = usesColor;
+    this.commandHandler = commandHandler;
     this.size = size;
     this.color = color;
     this.hoverStyle = hoverStyle;
-    this.commandHandler = commandHandler;
   }
 }
 
@@ -123,7 +125,15 @@ export class PaintBrush extends Brush {
   }
 
   constructor(size: number, color: string, commandHandler: CommandHandler) {
-    super("Paint Brush", true, size, color, "rounded-full", commandHandler);
+    super(
+      "Paint Brush",
+      true,
+      true,
+      commandHandler,
+      size,
+      color,
+      "rounded-full"
+    );
   }
 }
 
@@ -153,6 +163,24 @@ export class Eraser extends Brush {
   }
 
   constructor(size: number, commandHandler: CommandHandler) {
-    super("Eraser", false, size, "", "border-2 bg-white", commandHandler);
+    super("Eraser", true, false, commandHandler, size, "", "border-2 bg-white");
+  }
+}
+
+// Bucket Tool
+export class Bucket extends Brush {
+  // Store canvas's previous image data (to allow for undo) and fill all connected pixels that match starting color
+  startDraw(canvas: HTMLCanvasElement, x: number, y: number): void {
+    this.setPreviousImageData(canvas);
+    bucketFill(canvas, x, y, this.color);
+  }
+
+  // Store the canvas' new image data to allow for redo
+  endDraw(canvas: HTMLCanvasElement, _x: number, _y: number): void {
+    this.storeCommand(canvas);
+  }
+
+  constructor(commandHandler: CommandHandler) {
+    super("Bucket", false, true, commandHandler, 12, "#000000");
   }
 }

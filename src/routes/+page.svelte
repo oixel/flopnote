@@ -1,6 +1,11 @@
 <script lang="ts">
   import Canvas from "$lib/components/Canvas.svelte";
-  import { Brush, Eraser, PaintBrush } from "$lib/scripts/Brushes.svelte";
+  import {
+    Brush,
+    Bucket,
+    Eraser,
+    PaintBrush,
+  } from "$lib/scripts/Brushes.svelte";
   import { CommandHandler } from "$lib/scripts/CommandHandler";
 
   // Define canvas dimensions
@@ -12,7 +17,8 @@
 
   // Instantiate all the different brushes
   const paintBrush = new PaintBrush(3, "#000000", commandHandler);
-  let eraser = new Eraser(6, commandHandler);
+  const eraser = new Eraser(6, commandHandler);
+  const bucket = new Bucket(commandHandler);
 
   // Reactive variable storing the currently selected brush / tool
   let brush: Brush = $state(paintBrush);
@@ -28,12 +34,10 @@
           // Allows for undo and redo with Ctrl+Z and Ctrl+Shift+Z
           if (!event.shiftKey) commandHandler.undo();
           else commandHandler.redo();
-
           break;
         case "y":
           // Allows for redo functionality with Ctrl+Y
           commandHandler.redo();
-
           break;
       }
     } else {
@@ -45,6 +49,10 @@
         // Enables eraser with 'e'
         case "e":
           brush = eraser;
+          break;
+        // Enables bucket with 'g'
+        case "g":
+          brush = bucket;
           break;
         // Increases current brush/eraser size with up arrow
         case "arrowup":
@@ -71,15 +79,23 @@
     <!-- Tools to the left of the canvas -->
     <div class="grow w-full flex flex-col items-end">
       <div
-        class="w-9/10 max-w-40 p-2 mx-auto md:mx-2 flex flex-col justify-center items-center bg-blue-900 text-white rounded-xl border-4 border-white"
+        class="w-9/10 max-w-40 p-2 mx-auto md:mx-2 flex flex-col justify-center items-center bg-blue-900 text-white rounded-xl border-4 border-white select-none text-center"
       >
-        <!-- Displays currently selected tool and its size -->
-        <p class="select-none text-center">
+        <!-- Displays currently selected tool -->
+        <p class="">
           <b>Tool:</b>
-          {brush.name}<br /> <b>Size: </b>
-          {brush.size}px
+          {brush.name}
         </p>
-        <input type="range" min="1" max="50" bind:value={brush.size} />
+
+        <!-- Displays currently selected tool's size (if it uses one) -->
+        {#if brush.usesSize}
+          <p>
+            <b>Size:</b>
+            {brush.size}
+          </p>
+
+          <input type="range" min="1" max="50" bind:value={brush.size} />
+        {/if}
       </div>
     </div>
 
@@ -91,6 +107,7 @@
       class="grow w-full h-[{canvasHeight}px] flex flex-col justify-start items-start"
     >
       {#if brush.usesColor}
+        <!-- Color Picker -->
         <div
           class="w-9/10 max-w-48 p-2 mx-auto md:mx-2 flex flex-col rounded-md border-2 bg-white"
         >

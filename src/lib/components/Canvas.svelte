@@ -1,7 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
 
-  import { bucketFill } from "$lib/scripts/Bucket";
   import type { Brush } from "$lib/scripts/Brushes.svelte";
 
   let {
@@ -32,7 +31,7 @@
   let previousImageData: ImageData;
 
   onMount(() => {
-    // Initialize 2D context of canvas to allow for drawing
+    // Initialize 2D context for the initial fill of the canvas
     context = canvas.getContext("2d") as CanvasRenderingContext2D;
 
     // Initialize canvas with transparent background so that bucket can fill it
