@@ -27,7 +27,22 @@ export function hexToColor(hex: string, alpha: number): Color {
   return new Color(red, green, blue, alpha);
 }
 
-// Returns a Color object of the pixel at the linear coordinate
+// Convert a Color instance into a hex string
+export function colorToHex(color: Color): string {
+  // Convert RGB values to hexadecimal
+  let red = color.r.toString(16);
+  let green = color.g.toString(16);
+  let blue = color.b.toString(16);
+
+  // Pad RGB values with leading zero if it is missing one
+  if (red.length === 1) red = "0" + red;
+  if (green.length === 1) green = "0" + green;
+  if (blue.length === 1) blue = "0" + blue;
+
+  return `#${red}${green}${blue}`;
+}
+
+// Returns a Color object of the pixel at the given linear coordinate
 export function getColor(imageData: ImageData, coord: number): Color {
   const data = imageData.data;
 
@@ -37,6 +52,11 @@ export function getColor(imageData: ImageData, coord: number): Color {
     data[coord + 2],
     data[coord + 3]
   );
+}
+
+// Return a hex string representing the color of the pixel at the given linear coordinate
+export function getColorHex(imageData: ImageData, coord: number): string {
+  return colorToHex(getColor(imageData, coord));
 }
 
 // Update color of pixel at linear coordinate to passed-in color

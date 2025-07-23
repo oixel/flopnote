@@ -76,7 +76,7 @@
   function handleMouseHover(event: MouseEvent) {
     // Apply an offset if brush is being used instead of eraser (due to how brush draws)
     let brushOffset =
-      brush?.name == "Paint Brush"
+      brush?.name == "Paint Brush" && brush.size
         ? (brush?.size / 2) * Number(brush?.name == "Paint Brush")
         : 0;
     hoverPos = { x: event.x - brushOffset, y: event.y - brushOffset };
@@ -102,11 +102,11 @@
         top: ${hoverPos.y}px; 
         width: ${brush?.size}px; 
         height: ${brush?.size}px;
-        background-color: ${(brush?.usesColor) ? brushHandler.color : ""};
+        background-color: ${(brush?.color) ? brushHandler.color : ""};
     `}
   class="{isHovering
     ? 'visible'
-    : 'hidden'} {brush?.hoverStyle} absolute pointer-events-none select-none"
+    : 'hidden'} {brush?.hoverStyle} absolute pointer-events-none"
 ></div>
 
 <canvas
@@ -126,6 +126,7 @@
     // Update the mouse's position relative to the canvas
     canvasPosition = { x: event.offsetX, y: event.offsetY };
   }}
-  class="bg-white rounded-md border-2 {isHovering ? 'cursor-none' : ''} "
+  class="rounded-md border-2 {isHovering ? 'cursor-none' : ''} "
+  style="background-color: {brushHandler.backgroundColor};"
 >
 </canvas>

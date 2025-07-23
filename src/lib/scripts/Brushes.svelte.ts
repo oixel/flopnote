@@ -1,22 +1,24 @@
 import { bucketFill } from "./Bucket";
+import { getColor, getColorHex } from "./ColorTools";
 import type { CommandHandler } from "./CommandHandler";
 import { RenderCommand } from "./Commands";
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 export class Brush {
+  // Required brush attributes
   name: string;
-  usesSize: boolean;
-  usesColor: boolean;
-  commandHandler: CommandHandler;
-  size: number = $state(0);
-  color: string = $state("");
-  hoverStyle: string;
+
+  // Optional brush attributes
+  commandHandler?: CommandHandler;
+  size?: number = $state(undefined);
+  color?: string = $state(undefined);
+  hoverStyle?: string;
 
   previousImageData?: ImageData;
 
   // Alter the brush's current size based on the parameter
   changeSize(change: number): void {
-    if (this.usesSize) {
+    if (this.size) {
       this.size += change;
 
       // Enforce a minimum brush size of 1
@@ -26,7 +28,7 @@ export class Brush {
 
   // Update the brush's current color (if it uses one)
   changeColor(color: string): void {
-    if (this.usesColor) this.color = color;
+    if (this.color) this.color = color;
   }
 
   // Called when mouse is first clicked inside of the canvas
@@ -58,8 +60,7 @@ export class Brush {
 
   // Append current draw command to the command timeline
   storeCommand(canvas: HTMLCanvasElement): void {
-    // Append new brush strokes to command timeline
-    if (this.previousImageData) {
+    if (this.previousImageData && this.commandHandler) {
       const command = new RenderCommand(canvas, this.previousImageData);
       this.commandHandler.addCommand(command);
     }
@@ -67,16 +68,13 @@ export class Brush {
 
   constructor(
     name: string,
-    usesSize: boolean,
-    usesColor: boolean,
-    commandHandler: CommandHandler,
-    size: number,
-    color: string,
-    hoverStyle: string = ""
+    commandHandler?: CommandHandler,
+    size?: number,
+    color?: string,
+    hoverStyle?: string
   ) {
     this.name = name;
-    this.usesSize = usesSize;
-    this.usesColor = usesColor;
+
     this.commandHandler = commandHandler;
     this.size = size;
     this.color = color;
@@ -84,7 +82,7 @@ export class Brush {
   }
 }
 
-// Default paint brush
+// Default Paint Brush
 export class PaintBrush extends Brush {
   prevX: number = 0;
   prevY: number = 0;
@@ -107,8 +105,8 @@ export class PaintBrush extends Brush {
     const context = canvas.getContext("2d") as CanvasRenderingContext2D;
 
     // Apply stroke's current brush attributes before drawing out the stroke
-    context.lineWidth = this.size;
-    context.strokeStyle = this.color;
+    context.lineWidth = this.size as number;
+    context.strokeStyle = this.color as string;
 
     // Ensure that the brush is round
     context.lineCap = "round";
@@ -129,16 +127,8 @@ export class PaintBrush extends Brush {
     this.storeCommand(canvas);
   }
 
-  constructor(size: number, color: string, commandHandler: CommandHandler) {
-    super(
-      "Paint Brush",
-      true,
-      true,
-      commandHandler,
-      size,
-      color,
-      "rounded-full"
-    );
+  constructor(commandHandler: CommandHandler, size: number, color: string) {
+    super("Paint Brush", commandHandler, size, color, "rounded-full");
   }
 }
 
@@ -146,8 +136,8 @@ export class PaintBrush extends Brush {
 export class Eraser extends Brush {
   // Erase points on current canvas under mouse cursor
   erase(canvas: HTMLCanvasElement, x: number, y: number): void {
-    const context = canvas.getContext("2d");
-    context?.clearRect(x, y, this.size, this.size);
+    const context = canvas.getContext("2d") as CanvasRenderingContext2D;
+    context.clearRect(x, y, this.size as number, this.size as number);
   }
 
   // Erase initial points under mouse
@@ -167,8 +157,9 @@ export class Eraser extends Brush {
     this.storeCommand(canvas);
   }
 
-  constructor(size: number, commandHandler: CommandHandler) {
-    super("Eraser", true, false, commandHandler, size, "", "border-2 bg-white");
+  constructor(commandHandler: CommandHandler, size: number) {
+    super("Eraser", commandHandler, size);
+    this.hoverStyle = "border-2 bg-white";
   }
 }
 
@@ -179,10 +170,44 @@ export class Bucket extends Brush {
   // Attempt to flood fill all pixels with matching color, and store command on success
   startDraw(canvas: HTMLCanvasElement, x: number, y: number): void {
     this.setPreviousImageData(canvas);
-    if (bucketFill(canvas, x, y, this.color)) this.storeCommand(canvas);
+    if (bucketFill(canvas, x, y, this.color as string))
+      this.storeCommand(canvas);
   }
 
-  constructor(commandHandler: CommandHandler) {
-    super("Bucket", false, true, commandHandler, 12, "#000000");
+  constructor(commandHandler: CommandHandler, color: string) {
+    super("Bucket", commandHandler);
+    this.color = color;
+    this.hoverStyle = "w-5 h-5";
+  }
+}
+
+// Eye Dropper Tool
+export class EyeDropper extends Brush {
+  backgroundColor: string;
+
+  // Returns the hex color value of clicked pixel (or of background if clear pixel is clicked)
+  startDraw(canvas: HTMLCanvasElement, x: number, y: number): string {
+    const context = canvas.getContext("2d") as CanvasRenderingContext2D;
+    const imageData = context.getImageData(
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    ) as ImageData;
+    const coord = (y * canvas.width + x) * 4;
+    console.log(imageData.data[coord]);
+
+    // Return clicked color if it is not clear
+    if (getColor(imageData, coord).a != 0) return getColorHex(imageData, coord);
+    
+    // Return background color if a clear pixel was clicked
+    return this.backgroundColor;
+  }
+
+  constructor(backgroundColor: string) {
+    super("Eye Dropper");
+    this.hoverStyle = "rounded-full w-4 h-4 border-2 border-green-200";
+
+    this.backgroundColor = backgroundColor;
   }
 }

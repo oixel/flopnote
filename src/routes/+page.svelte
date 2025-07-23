@@ -45,7 +45,7 @@
           </p>
 
           <!-- Displays currently selected tool's size (if it uses one) -->
-          {#if brush.usesSize}
+          {#if brush.size}
             <p>
               <b>Size:</b>
               {brush.size}
@@ -69,7 +69,7 @@
       <div
         class="grow w-full h-[{canvasHeight}px] flex flex-col justify-start items-start"
       >
-        {#if brush.usesColor}
+        {#if brush.color || brush.name == "Eye Dropper"}
           <!-- Color Picker -->
           <div
             class="w-9/10 max-w-48 p-2 mx-auto md:mx-2 flex flex-col rounded-md border-2 bg-white"

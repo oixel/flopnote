@@ -42,6 +42,10 @@ export class InputHandler {
         case "g":
           this.brushHandler.setBrush(this.brushHandler.bucket);
           break;
+        // Enables eye dropper with 'i'
+        case "i":
+          this.brushHandler.setBrush(this.brushHandler.eyeDropper);
+          break;
         // Increases current brush/eraser size with up arrow
         case "arrowup":
           this.brushHandler.brush?.changeSize(1);
