@@ -8,6 +8,7 @@ export class Brush {
   color: string = $state("");
   hoverStyle: string;
   commandHandler: CommandHandler;
+  previousImageData?: ImageData;
 
   // Alter the brush's current size based on the parameter
   changeSize(change: number): void {
@@ -37,6 +38,15 @@ export class Brush {
     return;
   }
 
+  // Append current draw command to the command timeline
+  storeCommand(canvas: HTMLCanvasElement): void {
+    // Append new brush strokes to command timeline
+    if (this.previousImageData) {
+      const command = new RenderCommand(canvas, this.previousImageData);
+      this.commandHandler.addCommand(command);
+    }
+  }
+
   constructor(
     name: string,
     size: number,
@@ -52,17 +62,21 @@ export class Brush {
   }
 }
 
+// Default paint brush
 export class PaintBrush extends Brush {
   prevX: number = 0;
   prevY: number = 0;
-  previousImageData?: ImageData;
-
 
   // Grab current image data and apply initial points of brush stroke
   startDraw(canvas: HTMLCanvasElement, x: number, y: number): void {
     // Grab image data BEFORE this brush stroke, so it can be re-applied on RenderCommand's undo()
-    const context = canvas.getContext('2d') as CanvasRenderingContext2D;
-    this.previousImageData = context.getImageData(0, 0, canvas.width, canvas.height);
+    const context = canvas.getContext("2d") as CanvasRenderingContext2D;
+    this.previousImageData = context.getImageData(
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
 
     // Apply a very miniscule difference so that initial "line" can be drawn
     this.prevX = x + 0.0001;
@@ -75,7 +89,7 @@ export class PaintBrush extends Brush {
   // Draw a line stroke from the previous mouse position to the current mouse position
   draw(canvas: HTMLCanvasElement, x: number, y: number): void {
     // Grab canvas' current context
-    const context = canvas.getContext('2d') as CanvasRenderingContext2D;
+    const context = canvas.getContext("2d") as CanvasRenderingContext2D;
 
     // Apply stroke's current brush attributes before drawing out the stroke
     context.lineWidth = this.size;
@@ -94,18 +108,42 @@ export class PaintBrush extends Brush {
     this.prevY = y;
   }
 
-  // Add final points of brush stroke to canvas when mouse is released
-  endDraw(canvas: HTMLCanvasElement, x: number, y: number) {
+  // Add final points of brush stroke to canvas when mouse is released and store command
+  endDraw(canvas: HTMLCanvasElement, x: number, y: number): void {
     this.draw(canvas, x, y);
-    
-    // Append new brush strokes to command timeline
-    if (this.previousImageData){
-      const command = new RenderCommand(canvas, this.previousImageData);
-      this.commandHandler.addCommand(command);
-    }
+    this.storeCommand(canvas);
   }
 
   constructor(size: number, color: string, commandHandler: CommandHandler) {
     super("Paint Brush", size, color, "rounded-full", commandHandler);
+  }
+}
+
+// Default Eraser
+export class Eraser extends Brush {
+  // Erase points on current canvas under mouse cursor
+  erase(canvas: HTMLCanvasElement, x: number, y: number): void {
+    const context = canvas.getContext("2d");
+    context?.clearRect(x, y, this.size, this.size);
+  }
+
+  // Erase initial points under mouse
+  startDraw(canvas: HTMLCanvasElement, x: number, y: number): void {
+    this.erase(canvas, x, y);
+  }
+
+  // Erase under mouse as it gets moved
+  draw(canvas: HTMLCanvasElement, x: number, y: number): void {
+    this.erase(canvas, x, y);
+  }
+
+  // Erase final points when mouse is released and store erase command
+  endDraw(canvas: HTMLCanvasElement, x: number, y: number): void {
+    this.erase(canvas, x, y);
+    this.storeCommand(canvas);
+  }
+
+  constructor(size: number, commandHandler: CommandHandler) {
+    super("Eraser", size, "", "border-2", commandHandler);
   }
 }

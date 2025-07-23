@@ -1,6 +1,6 @@
 <script lang="ts">
   import Canvas from "$lib/components/Canvas.svelte";
-  import { Brush, PaintBrush } from "$lib/scripts/Brushes.svelte";
+  import { Brush, Eraser, PaintBrush } from "$lib/scripts/Brushes.svelte";
   import { CommandHandler } from "$lib/scripts/CommandHandler";
 
   // Define canvas dimensions
@@ -12,14 +12,18 @@
 
   // Instantiate all the different brushes
   const paintBrush = new PaintBrush(3, "#000000", commandHandler);
+  let eraser = new Eraser(6, commandHandler);
 
   // Reactive variable storing the currently selected brush / tool
   let brush: Brush = $state(paintBrush);
 
   // Handles all keybindings
   function onkeydown(event: KeyboardEvent) {
+    // Lowercase the key input to prevent issues when Caps-Lock is on
+    const keycode = event.key.toLowerCase();
+
     if (event.ctrlKey) {
-      switch (event.key.toLowerCase()) {
+      switch (keycode) {
         case "z":
           // Allows for undo and redo with Ctrl+Z and Ctrl+Shift+Z
           if (!event.shiftKey) commandHandler.undo();
@@ -33,12 +37,14 @@
           break;
       }
     } else {
-      switch (event.key) {
+      switch (keycode) {
         // Enables brush with 'b'
         case "b":
+          brush = paintBrush;
           break;
         // Enables eraser with 'e'
         case "e":
+          brush = eraser;
           break;
         // Increases current brush/eraser size with up arrow
         case "ArrowUp":
