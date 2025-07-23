@@ -14,13 +14,6 @@ export class Brush {
 
   previousImageData?: ImageData;
 
-  // 
-  setSize(size: number): void {
-    if (this.usesSize) {
-      this.size = size;
-    }
-  }
-
   // Alter the brush's current size based on the parameter
   changeSize(change: number): void {
     if (this.usesSize) {
@@ -176,15 +169,12 @@ export class Eraser extends Brush {
 
 // Bucket Tool
 export class Bucket extends Brush {
-  // Store canvas's previous image data (to allow for undo) and fill all connected pixels that match starting color
+  success: boolean = false;
+
+  // Attempt to flood fill all pixels with matching color, and store command on success
   startDraw(canvas: HTMLCanvasElement, x: number, y: number): void {
     this.setPreviousImageData(canvas);
-    bucketFill(canvas, x, y, this.color);
-  }
-
-  // Store the canvas' new image data to allow for redo
-  endDraw(canvas: HTMLCanvasElement, _x: number, _y: number): void {
-    this.storeCommand(canvas);
+    if (bucketFill(canvas, x, y, this.color)) this.storeCommand(canvas);
   }
 
   constructor(commandHandler: CommandHandler) {

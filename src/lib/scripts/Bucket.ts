@@ -12,7 +12,7 @@ export function bucketFill(
   x: number,
   y: number,
   color: string
-): void {
+): boolean {
   console.log(x, y)
   const width = canvas.width;
   const height = canvas.height;
@@ -29,7 +29,7 @@ export function bucketFill(
   const fillColor: Color = hexToColor(color, 255);
 
   // Prevent filling a color if it already matches
-  if (compareColors(startColor, fillColor)) return;
+  if (compareColors(startColor, fillColor)) return false;
 
   // Loops through all pixels that match the color of the start pixel
   while (pixelStack.length > 0) {
@@ -93,4 +93,7 @@ export function bucketFill(
 
   // Take the newly filled image data and push it to the canvas!
   context.putImageData(imageData, 0, 0);
+
+  // Bucket fill was a success!
+  return true;
 }
