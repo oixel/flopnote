@@ -41,11 +41,11 @@
           <!-- Displays currently selected tool -->
           <p class="">
             <b>Tool:</b>
-            {brush?.name}
+            {brush.name}
           </p>
 
           <!-- Displays currently selected tool's size (if it uses one) -->
-          {#if brush && brush.usesSize}
+          {#if brush.usesSize}
             <p>
               <b>Size:</b>
               {brush.size}
@@ -69,20 +69,22 @@
       <div
         class="grow w-full h-[{canvasHeight}px] flex flex-col justify-start items-start"
       >
-        {#if brush && brush.usesColor}
+        {#if brush.usesColor}
           <!-- Color Picker -->
           <div
             class="w-9/10 max-w-48 p-2 mx-auto md:mx-2 flex flex-col rounded-md border-2 bg-white"
           >
             <input
               type="color"
-              bind:value={brush.color}
+              bind:value={brushHandler.color}
+              oninput={(event) => brushHandler.setColor(event.currentTarget.value)}
               class="w-full h-full rounded-xl aspect-square style cursor-pointer border-solid hover:scale-102 transition-all duration-100"
             />
             <input
               type="text"
+              bind:value={brushHandler.color}
+              oninput={(event) => brushHandler.setColor(event.currentTarget.value)}
               class="w-full text-center pt-1"
-              bind:value={brush.color}
             />
           </div>
         {/if}

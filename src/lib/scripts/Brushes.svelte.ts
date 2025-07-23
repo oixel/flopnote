@@ -24,6 +24,11 @@ export class Brush {
     }
   }
 
+  // Update the brush's current color (if it uses one)
+  changeColor(color: string): void {
+    if (this.usesColor) this.color = color;
+  }
+
   // Called when mouse is first clicked inside of the canvas
   startDraw(_canvas: HTMLCanvasElement, _x: number, _y: number): void {
     return;
