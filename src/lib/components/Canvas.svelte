@@ -126,8 +126,6 @@
   onmouseenter={() => {
     // Only allow brush hovering while cursor is in the bounds of the canvas
     isHovering = true;
-    console.log("enter");
-    document.body.style.cursor = "none";
   }}
   onmouseleave={() => {
     // Turn off brush hovering when mouse exits the canvas' bounds

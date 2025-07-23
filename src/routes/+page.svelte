@@ -23,10 +23,16 @@
   // Reactive variable storing the currently selected brush / tool
   let brush: Brush = $state(paintBrush);
 
+  // Stores all the keys currently being pressed
+  let pressedKeys: Array<string> = [];
+
   // Handles all keybindings
   function onkeydown(event: KeyboardEvent) {
     // Lowercase the key input to prevent issues when Caps-Lock is on
     const keycode = event.key.toLowerCase();
+
+    // Add newly pressed key to array of all currently pressed keys
+    pressedKeys.push(keycode);
 
     if (event.ctrlKey) {
       switch (keycode) {
@@ -65,9 +71,25 @@
       }
     }
   }
+
+  // Remove any released keys from list of currently pressed keys
+  function onkeyup(event: KeyboardEvent) {
+    const keycode = event.key.toLowerCase();
+    pressedKeys.splice(pressedKeys.indexOf(keycode), 1);
+  }
+
+  // Handles functionality with mouse scroll wheel
+  function onwheel(event: WheelEvent) {
+    if (pressedKeys.includes("control")) {
+      if (brush.usesSize) {
+        if (event.deltaY > 0) brush.changeSize(1);
+        else brush.changeSize(-1);
+      }
+    }
+  }
 </script>
 
-<svelte:window {onkeydown} />
+<svelte:window {onkeydown} {onkeyup} {onwheel} />
 
 <div class="flex flex-col h-[100vh] overflow-hidden select-none cursor-default">
   <h1
