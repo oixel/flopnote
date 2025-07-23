@@ -102,7 +102,7 @@
         top: ${hoverPos.y}px; 
         width: ${brush?.size}px; 
         height: ${brush?.size}px;
-        background-color: ${(brush?.color) ? brushHandler.color : ""};
+        background-color: ${brush?.color ? brushHandler.color : ""};
     `}
   class="{isHovering
     ? 'visible'
@@ -126,7 +126,7 @@
     // Update the mouse's position relative to the canvas
     canvasPosition = { x: event.offsetX, y: event.offsetY };
   }}
-  class="rounded-md border-2 {isHovering ? 'cursor-none' : ''} "
+  class="rounded-md border-2 {brush?.cursor}"
   style="background-color: {brushHandler.backgroundColor};"
 >
 </canvas>

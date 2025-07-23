@@ -14,6 +14,9 @@ export class Brush {
   color?: string = $state(undefined);
   hoverStyle?: string;
 
+  // Sets the mouse cursor's icon while hovering over canvas
+  cursor: string = "cursor-none";
+
   previousImageData?: ImageData;
 
   // Alter the brush's current size based on the parameter
@@ -199,15 +202,14 @@ export class EyeDropper extends Brush {
 
     // Return clicked color if it is not clear
     if (getColor(imageData, coord).a != 0) return getColorHex(imageData, coord);
-    
+
     // Return background color if a clear pixel was clicked
     return this.backgroundColor;
   }
 
   constructor(backgroundColor: string) {
     super("Eye Dropper");
-    this.hoverStyle = "rounded-full w-4 h-4 border-2 border-green-200";
-
     this.backgroundColor = backgroundColor;
+    this.cursor = `cursor-crosshair`;
   }
 }
