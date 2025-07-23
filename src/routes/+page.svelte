@@ -25,7 +25,7 @@
 
 {#if brush}
   <div
-    class="flex flex-col h-[100vh] overflow-hidden select-none cursor-default"
+    class="fixed w-full h-full flex flex-col overflow-hidden overscroll-none touch-none select-none cursor-default"
   >
     <h1
       class="text-2xl font-medium bg-blue-900 text-white min-w-120 text-center py-3"
