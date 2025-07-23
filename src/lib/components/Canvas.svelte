@@ -1,15 +1,13 @@
 <script lang="ts">
   import { onMount } from "svelte";
 
-  import { CommandHandler } from "$lib/scripts/CommandHandler";
-  import { RenderCommand } from "$lib/scripts/Commands";
   import { bucketFill } from "$lib/scripts/Bucket";
   import type { Brush } from "$lib/scripts/Brushes.svelte";
 
   let {
     width,
     height,
-    brush
+    brush,
   }: {
     width: number;
     height: number;
@@ -19,14 +17,12 @@
   let canvas: HTMLCanvasElement;
   let context: CanvasRenderingContext2D;
 
-  const commandHandler = new CommandHandler();
-
   // Variables relating to active drawing
   let isDrawing = false;
   let offsetX: number;
   let offsetY: number;
 
-  //   Allows for brush hovering while mouse is over canvas
+  // Allows for brush hovering while mouse is over canvas
   let isHovering = $state(false);
   let hoverPos = $state({ x: 0, y: 0 });
 
@@ -55,21 +51,13 @@
     offsetY = rect.y;
   }
 
-  //   Called when eraser is used to draw; wipes the points under the eraser!
-  function erase(x: number, y: number, lineWidth: number) {
-    context.clearRect(x, y, lineWidth, lineWidth);
-  }
-
   // Toggle drawing on and grab line stroke's starting position
   function startMouseDraw(event: MouseEvent) {
-    // 
-    previousImageData = context.getImageData(0, 0, width, height);
-
     // Enable drawing mode
     isDrawing = true;
 
-    // Add initial brush stroke to canvas by cheesing the canvas `lineTo()` function (allows for dots)
-    brush.draw(context, event.x - offsetX, event.y - offsetY);
+    // Add initial brush stroke to canvas
+    brush.startDraw(canvas, event.x - offsetX, event.y - offsetY);
   }
 
   // Handles drawing as mouse moves around canvas
@@ -80,7 +68,7 @@
       const x = event.x - offsetX;
       const y = event.y - offsetY;
 
-      brush.draw(context, x, y);
+      brush.draw(canvas, x, y);
     }
   }
 
@@ -90,45 +78,18 @@
       isDrawing = false;
 
       // Add final points of brush stroke to canvas
-      const x = event.x - offsetX;
-      const y = event.y - offsetY;
-
-      brush.draw(context, x, y);
-      brush.stopDraw();
-
-      // Append new brush strokes to command timeline
-      const command = new RenderCommand(canvas, previousImageData);
-      commandHandler.addCommand(command);
+      brush.endDraw(canvas, event.x - offsetX, event.y - offsetY);
     }
   }
 
   // Provides brush hovering support for wherever the mouse is located
   function handleMouseHover(event: MouseEvent) {
     // Apply an offset if brush is being used instead of eraser (due to how brush draws)
-    let brushOffset = brush.name == "Paint Brush" ? (brush.size / 2) * Number(brush.name == "Paint Brush") : 0;
+    let brushOffset =
+      brush.name == "Paint Brush"
+        ? (brush.size / 2) * Number(brush.name == "Paint Brush")
+        : 0;
     hoverPos = { x: event.x - brushOffset, y: event.y - brushOffset };
-  }
-
-  // Handles keyboard shortcut for the Canvas
-  function onkeydown(event: KeyboardEvent) {
-    if (event.ctrlKey) {
-      switch (event.key.toLowerCase()) {
-        case "z":
-          // Allows for undo and redo with Ctrl+Z and Ctrl+Shift+Z
-          if (!event.shiftKey) commandHandler.undo();
-          else commandHandler.redo();
-
-          break;
-        case "y":
-          // Allows for redo functionality with Ctrl+Y
-          commandHandler.redo();
-
-          break;
-      }
-    }
-
-    if (event.key == "g")
-      bucketFill(canvas, canvasPosition.x, canvasPosition.y, brush.color);
   }
 </script>
 
@@ -154,7 +115,9 @@
         height: ${brush.size}px;
         background-color: ${brush.color};
     `}
-  class="{isHovering ? "visible" : "hidden"} {brush.hoverStyle} absolute select-none pointer-events-none"
+  class="{isHovering
+    ? 'visible'
+    : 'hidden'} {brush.hoverStyle} absolute select-none pointer-events-none"
 ></div>
 
 <canvas
