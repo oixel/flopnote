@@ -69,7 +69,7 @@
     isDrawing = true;
 
     // Add initial brush stroke to canvas by cheesing the canvas `lineTo()` function (allows for dots)
-    brush.draw(context, event.x, event.y);
+    brush.draw(context, event.x - offsetX, event.y - offsetY);
   }
 
   // Handles drawing as mouse moves around canvas
