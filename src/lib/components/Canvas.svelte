@@ -1,19 +1,22 @@
 <script lang="ts">
   import { onMount } from "svelte";
 
-  import type { Brush } from "$lib/scripts/Brushes.svelte";
+  import { BrushHandler } from "$lib/scripts/BrushHandler.svelte";
 
   let {
     width,
     height,
-    brush,
+    brushHandler,
   }: {
     width: number;
     height: number;
-    brush: Brush;
+    brushHandler: BrushHandler;
   } = $props();
 
   let canvas: HTMLCanvasElement;
+
+  // Grab the current brush from the brush handler to apply hover style and access custom values
+  let brush = $derived(brushHandler.brush);
 
   // Variables relating to active drawing
   let isDrawing = false;
@@ -44,7 +47,7 @@
     isDrawing = true;
 
     // Add initial brush stroke to canvas
-    brush.startDraw(canvas, event.x - offsetX, event.y - offsetY);
+    brushHandler.startDraw(canvas, event.x - offsetX, event.y - offsetY);
   }
 
   // Handles drawing as mouse moves around canvas
@@ -55,7 +58,7 @@
       const x = event.x - offsetX;
       const y = event.y - offsetY;
 
-      brush.draw(canvas, x, y);
+      brushHandler.draw(canvas, x, y);
     }
   }
 
@@ -65,7 +68,7 @@
       isDrawing = false;
 
       // Add final points of brush stroke to canvas
-      brush.endDraw(canvas, event.x - offsetX, event.y - offsetY);
+      brushHandler.endDraw(canvas, event.x - offsetX, event.y - offsetY);
     }
   }
 
@@ -73,8 +76,8 @@
   function handleMouseHover(event: MouseEvent) {
     // Apply an offset if brush is being used instead of eraser (due to how brush draws)
     let brushOffset =
-      brush.name == "Paint Brush"
-        ? (brush.size / 2) * Number(brush.name == "Paint Brush")
+      brush?.name == "Paint Brush"
+        ? (brush?.size / 2) * Number(brush?.name == "Paint Brush")
         : 0;
     hoverPos = { x: event.x - brushOffset, y: event.y - brushOffset };
   }
@@ -97,13 +100,13 @@
   style={`
         left: ${hoverPos.x}px;
         top: ${hoverPos.y}px; 
-        width: ${brush.size}px; 
-        height: ${brush.size}px;
-        background-color: ${brush.color};
+        width: ${brush?.size}px; 
+        height: ${brush?.size}px;
+        background-color: ${(brush?.usesColor) ? brushHandler.color : ""};
     `}
   class="{isHovering
     ? 'visible'
-    : 'hidden'} {brush.hoverStyle} absolute pointer-events-none"
+    : 'hidden'} {brush?.hoverStyle} absolute pointer-events-none select-none"
 ></div>
 
 <canvas

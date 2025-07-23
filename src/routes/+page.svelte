@@ -63,7 +63,7 @@
       </div>
 
       <!-- The canvas which the user draws on -->
-      <Canvas width={canvasWidth} height={canvasHeight} {brush} />
+      <Canvas width={canvasWidth} height={canvasHeight} {brushHandler} />
 
       <!-- Tools to the right side of the canvas -->
       <div
@@ -77,13 +77,11 @@
             <input
               type="color"
               bind:value={brushHandler.color}
-              oninput={(event) => brushHandler.setColor(event.currentTarget.value)}
               class="w-full h-full rounded-xl aspect-square style cursor-pointer border-solid hover:scale-102 transition-all duration-100"
             />
             <input
               type="text"
               bind:value={brushHandler.color}
-              oninput={(event) => brushHandler.setColor(event.currentTarget.value)}
               class="w-full text-center pt-1"
             />
           </div>

@@ -20,9 +20,22 @@ export class BrushHandler {
     brush.changeColor(this.color);
   }
 
-  // Apply new universal color to the current brush (if it uses color)
-  setColor(color: string): void {
-    this.brush?.changeColor(color);
+  //
+  startDraw(canvas: HTMLCanvasElement, x: number, y: number): void {
+    if (this.brush) {
+      this.brush.color = this.color;
+      this.brush?.startDraw(canvas, x, y);
+    }
+  }
+
+  //
+  draw(canvas: HTMLCanvasElement, x: number, y: number): void {
+    this.brush?.draw(canvas, x, y);
+  }
+
+  //
+  endDraw(canvas: HTMLCanvasElement, x: number, y: number): void {
+    this.brush?.endDraw(canvas, x, y);
   }
 
   constructor(commandHandler: CommandHandler) {
