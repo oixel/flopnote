@@ -69,9 +69,9 @@
 
 <svelte:window {onkeydown} />
 
-<div class="flex flex-col h-[100vh] overflow-hidden">
+<div class="flex flex-col h-[100vh] overflow-hidden select-none cursor-default">
   <h1
-    class="text-2xl font-medium bg-blue-900 text-white min-w-120 text-center py-3 select-none"
+    class="text-2xl font-medium bg-blue-900 text-white min-w-120 text-center py-3"
   >
     Welcome to flopnote!
   </h1>
@@ -79,7 +79,7 @@
     <!-- Tools to the left of the canvas -->
     <div class="grow w-full flex flex-col items-end">
       <div
-        class="w-9/10 max-w-40 p-2 mx-auto md:mx-2 flex flex-col justify-center items-center bg-blue-900 text-white rounded-xl border-4 border-white select-none text-center"
+        class="w-9/10 max-w-40 p-2 mx-auto md:mx-2 flex flex-col justify-center items-center bg-blue-900 text-white rounded-md border-2 border-white text-center"
       >
         <!-- Displays currently selected tool -->
         <p class="">
@@ -94,7 +94,13 @@
             {brush.size}
           </p>
 
-          <input type="range" min="1" max="50" bind:value={brush.size} />
+          <input
+            type="range"
+            min="1"
+            max="50"
+            bind:value={brush.size}
+            class="cursor-pointer"
+          />
         {/if}
       </div>
     </div>

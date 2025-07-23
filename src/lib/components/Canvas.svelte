@@ -97,7 +97,6 @@
 <svelte:window
   onresize={setOffset}
   {onkeydown}
-  onmousedown={startMouseDraw}
   onmouseup={endDraw}
   onmousemove={mouseDraw}
 />
@@ -116,16 +115,19 @@
     `}
   class="{isHovering
     ? 'visible'
-    : 'hidden'} {brush.hoverStyle} absolute select-none pointer-events-none"
+    : 'hidden'} {brush.hoverStyle} absolute pointer-events-none"
 ></div>
 
 <canvas
   {width}
   {height}
   bind:this={canvas}
+  onmousedown={startMouseDraw}
   onmouseenter={() => {
     // Only allow brush hovering while cursor is in the bounds of the canvas
     isHovering = true;
+    console.log("enter");
+    document.body.style.cursor = "none";
   }}
   onmouseleave={() => {
     // Turn off brush hovering when mouse exits the canvas' bounds
@@ -135,6 +137,6 @@
     // Update the mouse's position relative to the canvas
     canvasPosition = { x: event.offsetX, y: event.offsetY };
   }}
-  class="bg-white rounded-md cursor-none select-none"
+  class="bg-white rounded-md border-2 {isHovering ? 'cursor-none' : ''} "
 >
 </canvas>
