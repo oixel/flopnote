@@ -46,7 +46,7 @@
 
           <!-- Displays currently selected tool's size (if it uses one) -->
           {#if brush.size}
-            <p class="border-t-2 w-full mt-2 pt-2">
+            <p class="border-t-2 border-dashed w-full mt-2 pt-2">
               <b>Size:</b>
               {brush.size}
             </p>
