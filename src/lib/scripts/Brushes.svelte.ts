@@ -111,8 +111,9 @@ export class PaintBrush extends Brush {
     context.lineCap = "round";
     context.lineJoin = "round";
 
-    // Add initial points of brush stroke
+    // Add initial points of brush stroke and draw out initial point
     this.brushStroke = [{ x, y }];
+    this.draw(canvas, x, y);
   }
 
   // Draws out canvas content from before the brush stroke and then draws out current brush stroke on top
