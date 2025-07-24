@@ -99,6 +99,7 @@ export function compareColors(colorA: Color, colorB: Color): boolean {
   return (
     colorA.r === colorB.r &&
     colorA.g === colorB.g &&
-    colorA.b === colorB.b
+    colorA.b === colorB.b &&
+    colorA.a === colorB.a
   );
 }
