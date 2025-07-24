@@ -5,6 +5,8 @@ import {
   EyeDropper,
   PaintBrush,
 } from "./Brushes.svelte";
+
+import { Color } from "./ColorTools.svelte";
 import type { CommandHandler } from "./CommandHandler";
 
 export class BrushHandler {
@@ -17,10 +19,10 @@ export class BrushHandler {
   eyeDropper: EyeDropper;
 
   // Store selected color in BrushHandler so all brushes that use color have the same, universal color
-  color: string = $state("#000000");
+  color: Color = $state(new Color(0, 0, 0, 255));
 
   // Store the background layer's color to allow the eye dropper to return it if nothing else is hit
-  backgroundColor: string = $state("#ffffff");
+  backgroundColor: Color = $state(new Color(255, 255, 255, 255));
 
   // Change currently selected brush
   setBrush(brush: Brush): void {
@@ -40,7 +42,7 @@ export class BrushHandler {
       const output = this.brush.startDraw(canvas, x, y);
 
       // Allows eye dropper tool to work
-      if (typeof output === "string") this.color = output;
+      if (output != undefined) this.color = output;
     }
   }
 

@@ -3,7 +3,7 @@ export class Color {
   r: number;
   g: number;
   b: number;
-  a: number;
+  a: number = $state(255);
 
   constructor(r: number, g: number, b: number, a: number) {
     this.r = r;
@@ -55,8 +55,12 @@ export function getColor(imageData: ImageData, coord: number): Color {
 }
 
 // Returns a Color object of the pixel at the given cartesian coordinate
-export function getColorXY(canvas: HTMLCanvasElement, x: number, y: number): Color {
-  const context = canvas.getContext('2d') as CanvasRenderingContext2D;
+export function getColorXY(
+  canvas: HTMLCanvasElement,
+  x: number,
+  y: number
+): Color {
+  const context = canvas.getContext("2d") as CanvasRenderingContext2D;
   const imageData = context.getImageData(x, y, 1, 1).data;
 
   return new Color(imageData[0], imageData[1], imageData[2], imageData[3]);
@@ -67,8 +71,12 @@ export function getColorHex(imageData: ImageData, coord: number): string {
   return colorToHex(getColor(imageData, coord));
 }
 
-// Return a hex string represnting the color of the pixel at the given cartesian coordinate
-export function getColorHexXY(canvas: HTMLCanvasElement, x: number, y: number): string {
+// Return a hex string representing the color of the pixel at the given cartesian coordinate
+export function getColorHexXY(
+  canvas: HTMLCanvasElement,
+  x: number,
+  y: number
+): string {
   return colorToHex(getColorXY(canvas, x, y));
 }
 
