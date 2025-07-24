@@ -2,7 +2,6 @@
   import { onMount } from "svelte";
 
   import { BrushHandler } from "$lib/scripts/BrushHandler.svelte";
-  import { colorToHex } from "$lib/scripts/ColorTools.svelte";
 
   let {
     width,
@@ -104,12 +103,12 @@
         top: ${hoverPos.y}px; 
         width: ${brush.size}px; 
         height: ${brush.size}px;
-        background-color: ${brush.color ? colorToHex(brushHandler.color) : ""};
+        background-color: ${brush.color ? brushHandler.getColor(true) : ""};
         opacity: ${brush.color ? `${(brush.color.a / 255) * 100}%` : "100%"};
     `}
     class="{isHovering
       ? 'visible'
-      : 'hidden'} {brush?.hoverStyle} fixed pointer-events-none"
+      : 'hidden'} {brush.hoverStyle} fixed pointer-events-none"
   ></div>
 {/if}
 
@@ -131,6 +130,6 @@
     canvasPosition = { x: event.offsetX, y: event.offsetY };
   }}
   class="rounded-md border-2 {brush?.cursor}"
-  style="background-color: {colorToHex(brushHandler.backgroundColor)};"
+  style="background-color: {brushHandler.getBackgroundColor(true)};"
 >
 </canvas>

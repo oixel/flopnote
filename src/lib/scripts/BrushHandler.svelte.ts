@@ -6,7 +6,7 @@ import {
   PaintBrush,
 } from "./Brushes.svelte";
 
-import { Color } from "./ColorTools.svelte";
+import { Color, colorToHex, hexToColor } from "./ColorTools.svelte";
 import type { CommandHandler } from "./CommandHandler";
 
 export class BrushHandler {
@@ -30,6 +30,24 @@ export class BrushHandler {
 
     // Ensure newly selected brush uses the universally selected color
     brush.changeColor(this.color);
+  }
+
+  // Stores new color as Color regardless if a Color instance or hex string is passed in
+  setColor(color: string | Color): void {
+    if (color instanceof Color) this.color = color;
+    else color = hexToColor(color, this.color.a);
+  }
+
+  // Returns the currently selected color either as a Color instance or a hex string
+  getColor(asHex: boolean = false): Color | string {
+    if (!asHex) return this.color;
+    else return colorToHex(this.color);
+  }
+
+  // Returns the currently selected background color as a Color instance or a hex string
+  getBackgroundColor(asHex: boolean = false): Color | string {
+    if (!asHex) return this.backgroundColor;
+    else return colorToHex(this.backgroundColor);
   }
 
   // Applies universal color to brushes that need it, and serves as a controller for current brush's startDraw()
