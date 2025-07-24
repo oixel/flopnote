@@ -1,18 +1,19 @@
 import {
   Color,
+  hexToColor,
   getColor,
   setColor,
   compareColors,
-} from "$lib/scripts/ColorTools.svelte";
+} from "$lib/scripts/ColorTools";
 
 // A combined iterative / recursive flood fill algorithm based on https://www.williammalone.com/articles/html5-canvas-javascript-paint-bucket-tool/
 export function bucketFill(
   canvas: HTMLCanvasElement,
   x: number,
   y: number,
-  fillColor: Color
+  color: string
 ): boolean {
-  console.log(x, y);
+  console.log(x, y)
   const width = canvas.width;
   const height = canvas.height;
   const context = canvas.getContext("2d") as CanvasRenderingContext2D;
@@ -25,6 +26,7 @@ export function bucketFill(
   let coord = (y * width + x) * 4;
 
   const startColor: Color = getColor(imageData, coord);
+  const fillColor: Color = hexToColor(color, 255);
 
   // Prevent filling a color if it already matches
   if (compareColors(startColor, fillColor)) return false;

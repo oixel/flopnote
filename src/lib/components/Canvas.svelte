@@ -2,7 +2,6 @@
   import { onMount } from "svelte";
 
   import { BrushHandler } from "$lib/scripts/BrushHandler.svelte";
-  import { colorToHex } from "$lib/scripts/ColorTools.svelte";
 
   let {
     width,
@@ -16,7 +15,7 @@
 
   let canvas: HTMLCanvasElement;
 
-  // Grab the current brush from the brush handler to apply hover style and access custom values (without having to do brushHandler.brush)
+  // Grab the current brush from the brush handler to apply hover style and access custom values
   let brush = $derived(brushHandler.brush);
 
   // Variables relating to active drawing
@@ -96,22 +95,20 @@
 <!-- Track mouse position to place brush hover where mouse is -->
 <svelte:document onmousemove={handleMouseHover} />
 
-{#if brush}
-  <!-- Renders brush/eraser wherever mouse is hovering on canvas-->
-  <div
-    style={`
+<!-- Renders brush/eraser wherever mouse is hovering on canvas-->
+<div
+  style={`
         left: ${hoverPos.x}px;
         top: ${hoverPos.y}px; 
-        width: ${brush.size}px; 
-        height: ${brush.size}px;
-        background-color: ${brush.color ? colorToHex(brushHandler.color) : ""};
-        opacity: ${brush.color ? `${(brush.color.a / 255) * 100}%` : "100%"};
+        width: ${brush?.size}px; 
+        height: ${brush?.size}px;
+        background-color: ${brush?.color ? brushHandler.color : ""};
+        opacity: ${brush?.opacity ? `${brush.opacity}%` : "100%"};
     `}
-    class="{isHovering
-      ? 'visible'
-      : 'hidden'} {brush?.hoverStyle} fixed pointer-events-none"
-  ></div>
-{/if}
+  class="{isHovering
+    ? 'visible'
+    : 'hidden'} {brush?.hoverStyle} fixed pointer-events-none"
+></div>
 
 <canvas
   {width}
@@ -131,6 +128,6 @@
     canvasPosition = { x: event.offsetX, y: event.offsetY };
   }}
   class="rounded-md border-2 {brush?.cursor}"
-  style="background-color: {colorToHex(brushHandler.backgroundColor)};"
+  style="background-color: {brushHandler.backgroundColor};"
 >
 </canvas>

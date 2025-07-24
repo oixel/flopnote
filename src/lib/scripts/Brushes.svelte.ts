@@ -1,5 +1,5 @@
 import { bucketFill } from "./Bucket";
-import { Color, colorToHex, getColorXY } from "./ColorTools.svelte";
+import { getColorHexXY, getColorXY } from "./ColorTools";
 import type { CommandHandler } from "./CommandHandler";
 import { RenderCommand } from "./Commands";
 
@@ -9,13 +9,14 @@ export class Brush {
 
   commandHandler?: CommandHandler;
 
-  size?: number = $state(undefined); // Optional: some brushes don't need a size (e.g. Bucket)
+  size?: number = $state(undefined);  // Optiona: some brushes don't need a size (e.g. Bucket)
   maxSize: number = 100;
 
-  color?: Color = $state(undefined); // Optional: some brushes don't need colors (e.g. Eraser)
+  color?: string = $state(undefined);  // Optional: some brushes don't need colors (e.g. Eraser)
+  opacity?: number = $state(undefined);  // Optional: some brushes don't need opacity (e.g. Eye Dropper)
 
-  cursor: string = "cursor-none"; // Sets the mouse cursor's icon while hovering over canvas
-  hoverStyle?: string; // Appearance of brush while hovering over canvas
+  cursor: string = "cursor-none";  // Sets the mouse cursor's icon while hovering over canvas
+  hoverStyle?: string;  // Appearance of brush while hovering over canvas
 
   previousImageData?: ImageData;
 
@@ -31,7 +32,7 @@ export class Brush {
   }
 
   // Update the brush's current color (if it uses one)
-  changeColor(color: Color): void {
+  changeColor(color: string): void {
     if (this.color) this.color = color;
   }
 
@@ -74,7 +75,8 @@ export class Brush {
     name: string,
     commandHandler?: CommandHandler,
     size?: number,
-    color?: Color,
+    color?: string,
+    opacity?: number,
     hoverStyle?: string
   ) {
     this.name = name;
@@ -82,6 +84,7 @@ export class Brush {
     this.commandHandler = commandHandler;
     this.size = size;
     this.color = color;
+    this.opacity = opacity;
     this.hoverStyle = hoverStyle;
   }
 }
@@ -97,16 +100,12 @@ export class PaintBrush extends Brush {
   startDraw(canvas: HTMLCanvasElement, x: number, y: number): void {
     this.setPreviousImageData(canvas);
 
-    const context = canvas.getContext("2d") as CanvasRenderingContext2D;
+    const context = canvas.getContext('2d') as CanvasRenderingContext2D;
 
     // Apply stroke's current brush attributes before drawing out the stroke
     context.lineWidth = this.size as number;
-
-    //
-    if (this.color) {
-      context.strokeStyle = colorToHex(this.color);
-      context.globalAlpha = this.color.a / 255;
-    }
+    context.strokeStyle = this.color as string;
+    context.globalAlpha = this.opacity as number / 100;
 
     // Ensure that the brush is round
     context.lineCap = "round";
@@ -145,13 +144,8 @@ export class PaintBrush extends Brush {
     this.storeCommand(canvas);
   }
 
-  constructor(
-    commandHandler: CommandHandler,
-    size: number,
-    color: Color,
-    opacity: number
-  ) {
-    super("Paint Brush", commandHandler, size, color, "rounded-full");
+  constructor(commandHandler: CommandHandler, size: number, color: string, opacity: number) {
+    super("Paint Brush", commandHandler, size, color, opacity, "rounded-full");
   }
 }
 
@@ -193,12 +187,11 @@ export class Bucket extends Brush {
   // Attempt to flood fill all pixels with matching color, and store command on success
   startDraw(canvas: HTMLCanvasElement, x: number, y: number): void {
     this.setPreviousImageData(canvas);
-
-    if (this.color && bucketFill(canvas, x, y, this.color))
+    if (bucketFill(canvas, x, y, this.color as string))
       this.storeCommand(canvas);
   }
 
-  constructor(commandHandler: CommandHandler, color: Color) {
+  constructor(commandHandler: CommandHandler, color: string) {
     super("Bucket", commandHandler);
     this.color = color;
     this.hoverStyle = "w-5 h-5";
@@ -207,17 +200,18 @@ export class Bucket extends Brush {
 
 // Eye Dropper Tool
 export class EyeDropper extends Brush {
-  backgroundColor: Color;
+  backgroundColor: string;
 
   // Returns the hex color value of clicked pixel (or of background if clear pixel is clicked)
-  startDraw(canvas: HTMLCanvasElement, x: number, y: number): Color {
-    const color = getColorXY(canvas, x, y);
+  startDraw(canvas: HTMLCanvasElement, x: number, y: number): string {
+    // Return clicked color if it is not clear
+    if (getColorXY(canvas, x, y).a != 0) return getColorHexXY(canvas, x, y);
 
-    if (color.a != 0) return color;
+    // Otherwise, return background color if a clear pixel was clicked
     return this.backgroundColor;
   }
 
-  constructor(backgroundColor: Color) {
+  constructor(backgroundColor: string) {
     super("Eye Dropper");
     this.backgroundColor = backgroundColor;
     this.cursor = `cursor-crosshair`;
