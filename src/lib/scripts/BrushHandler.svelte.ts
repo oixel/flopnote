@@ -56,7 +56,7 @@ export class BrushHandler {
 
   constructor(commandHandler: CommandHandler) {
     // Instantiate all the different brushes
-    this.paintBrush = new PaintBrush(commandHandler, 3, this.color);
+    this.paintBrush = new PaintBrush(commandHandler, 3, this.color, 100);
     this.eraser = new Eraser(commandHandler, 8);
     this.bucket = new Bucket(commandHandler, this.color);
     this.eyeDropper = new EyeDropper(this.backgroundColor);

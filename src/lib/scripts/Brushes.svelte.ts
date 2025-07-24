@@ -13,6 +13,7 @@ export class Brush {
   maxSize: number = 100;
 
   color?: string = $state(undefined);  // Optional: some brushes don't need colors (e.g. Eraser)
+  opacity?: number = $state(undefined);  // Optional: some brushes don't need opacity (e.g. Eye Dropper)
 
   cursor: string = "cursor-none";  // Sets the mouse cursor's icon while hovering over canvas
   hoverStyle?: string;  // Appearance of brush while hovering over canvas
@@ -75,6 +76,7 @@ export class Brush {
     commandHandler?: CommandHandler,
     size?: number,
     color?: string,
+    opacity?: number,
     hoverStyle?: string
   ) {
     this.name = name;
@@ -82,6 +84,7 @@ export class Brush {
     this.commandHandler = commandHandler;
     this.size = size;
     this.color = color;
+    this.opacity = opacity;
     this.hoverStyle = hoverStyle;
   }
 }
@@ -91,48 +94,57 @@ export class PaintBrush extends Brush {
   prevX: number = 0;
   prevY: number = 0;
 
+  brushStroke: Array<{ x: number; y: number }> = [];
+
   // Grab current image data and apply initial points of brush stroke
   startDraw(canvas: HTMLCanvasElement, x: number, y: number): void {
     this.setPreviousImageData(canvas);
 
-    // Apply a very miniscule difference so that initial "line" can be drawn
-    this.prevX = x + 0.0001;
-    this.prevY = y + 0.0001;
-
-    // Add initial points of brush stroke to canvas by cheesing the canvas `lineTo()` function (allows for dots)
-    this.draw(canvas, x, y);
-  }
-
-  // Draw a line stroke from the previous mouse position to the current mouse position
-  draw(canvas: HTMLCanvasElement, x: number, y: number): void {
-    // Grab canvas' current context
-    const context = canvas.getContext("2d") as CanvasRenderingContext2D;
+    const context = canvas.getContext('2d') as CanvasRenderingContext2D;
 
     // Apply stroke's current brush attributes before drawing out the stroke
     context.lineWidth = this.size as number;
     context.strokeStyle = this.color as string;
+    context.globalAlpha = this.opacity as number / 100;
 
     // Ensure that the brush is round
     context.lineCap = "round";
+    context.lineJoin = "round";
 
-    // Draw out the brush stroke!
-    context.beginPath();
-    context.moveTo(this.prevX, this.prevY);
-    context.lineTo(x, y);
-    context.stroke();
-
-    this.prevX = x;
-    this.prevY = y;
+    // Add initial points of brush stroke
+    this.brushStroke = [{ x, y }];
   }
 
-  // Add final points of brush stroke to canvas when mouse is released and store command
+  // Draws out canvas content from before the brush stroke and then draws out current brush stroke on top
+  // Do it this way rather than just drawing every move allows for brush strokes of different opacities
+  draw(canvas: HTMLCanvasElement, x: number, y: number): void {
+    // Append new brush stroke points
+    this.brushStroke.push({ x, y });
+
+    // Grab canvas' current context
+    const context = canvas.getContext("2d") as CanvasRenderingContext2D;
+
+    // Redraw canvas' previous content back onto it
+    context.putImageData(this.previousImageData as ImageData, 0, 0);
+
+    // Draw out the current brush stroke's line data on top of previous content
+    context.beginPath();
+    context.moveTo(this.brushStroke[0].x, this.brushStroke[0].y);
+    for (let i = 1; i < this.brushStroke.length; i++) {
+      context.lineTo(this.brushStroke[i].x, this.brushStroke[i].y);
+    }
+
+    // Fill brush stroke's path!
+    context.stroke();
+  }
+
+  // Store canvas' new state in command time line for redo()
   endDraw(canvas: HTMLCanvasElement, x: number, y: number): void {
-    this.draw(canvas, x, y);
     this.storeCommand(canvas);
   }
 
-  constructor(commandHandler: CommandHandler, size: number, color: string) {
-    super("Paint Brush", commandHandler, size, color, "rounded-full");
+  constructor(commandHandler: CommandHandler, size: number, color: string, opacity: number) {
+    super("Paint Brush", commandHandler, size, color, opacity, "rounded-full");
   }
 }
 

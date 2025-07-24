@@ -46,7 +46,7 @@
 
           <!-- Displays currently selected tool's size (if it uses one) -->
           {#if brush.size}
-            <p>
+            <p class="border-t-2 w-full mt-2 pt-2">
               <b>Size:</b>
               {brush.size}
             </p>
@@ -56,6 +56,20 @@
               min="1"
               max={brush.maxSize}
               bind:value={brush.size}
+              class="cursor-pointer"
+            />
+          {/if}
+
+          {#if brush.opacity}
+            <p>
+              <b>Opacity:</b>
+              {brush.opacity}
+            </p>
+            <input
+              type="range"
+              min="1"
+              max="100"
+              bind:value={brush.opacity}
               class="cursor-pointer"
             />
           {/if}
