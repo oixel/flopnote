@@ -87,11 +87,16 @@ export function setColor(
 }
 
 // Take two Color instances and compare them
-export function compareColors(colorA: Color, colorB: Color): boolean {
+export function compareColors(colorA: Color, colorB: Color, threshold: number = 5): boolean {
+  // Allows for semi-similar colors to be filled
+  function inThreshold(numA: number, numB: number, threshold: number): boolean {
+    return Math.abs(numA - numB) < threshold;
+  };
+
   return (
-    colorA.r === colorB.r &&
-    colorA.g === colorB.g &&
-    colorA.b === colorB.b &&
-    colorA.a === colorB.a
+    inThreshold(colorA.r, colorB.r, threshold) &&
+    inThreshold(colorA.g, colorB.g, threshold) &&
+    inThreshold(colorA.b, colorB.b, threshold) &&
+    inThreshold(colorA.a, colorB.a, threshold * 2)
   );
 }
