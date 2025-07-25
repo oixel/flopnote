@@ -17,7 +17,7 @@ function bucketFill(
   y: number,
   color: string,
   threshold: number
-): boolean {
+): void {
   // Store canvas data in variables for cleaner code
   const width = canvas.width;
   const height = canvas.height;
@@ -26,15 +26,19 @@ function bucketFill(
   const pixelStack = [{ x, y }];
   const imageData = context.getImageData(0, 0, width, height);
 
+  // Fixed 8-bit unsigned integer, 0 by default (essentially a array of all coords defaulted to false)
+  const visited = new Uint8Array(width * height);
+
+  // Takes cartesian coordinate and converts it to linear coordinate for position in the visited array / canvas ImageData
+  const getIndex = (x: number, y: number): number => y * width + x;
+  const getPixelCoord = (x: number, y: number): number => getIndex(x, y) * 4;
+
   // Represents the pixel's coordinate (x, y) as a *linear* coordinate in the *linear* array of image data
   // Note: each value follows the structure of [red, green, blue, alpha, red, ...]
-  let coord = (y * width + x) * 4;
+  let coord = getPixelCoord(x, y);
 
   const startColor: Color = getColor(imageData, coord);
   const fillColor: Color = hexToColor(color, 255);
-
-  // Prevent fill if clicked color is IDENTICAL to starting color
-  if (doColorsMatch(startColor, fillColor, 0)) return false;
 
   // Loops through all pixels that match the color of the start pixel
   while (pixelStack.length > 0) {
@@ -43,11 +47,9 @@ function bucketFill(
 
     x = newPixel.x;
     y = newPixel.y;
+    coord = getPixelCoord(x, y); // Pixel's coordinates are linear since ImageData is a 1D array where each pixel is represented by 4 indexes for RGBA
 
-    // Convert new pixel's regular coordinate position, to a *linear* coordinate
-    coord = (y * width + x) * 4;
-
-    // Move to furthest upwards point that matches the starting color
+    // Move to topmost pixel that matches the starting color
     while (
       y-- >= 0 &&
       doColorsMatch(getColor(imageData, coord), startColor, threshold)
@@ -55,8 +57,8 @@ function bucketFill(
       coord -= width * 4;
     }
 
-    coord += width * 4;
     y++;
+    coord += width * 4;
 
     // Prevent looping past furthest left / right point
     let reachedLeft = false;
@@ -69,14 +71,16 @@ function bucketFill(
     ) {
       // Fill the current pixel with the fill color!
       setColor(imageData, coord, fillColor);
+      visited[getIndex(x, y)] = 1;
 
-      // Move as far left as possible before a different colored pixel is reached
+      // Check left neighboring pixel
       if (x > 0) {
         if (
           doColorsMatch(getColor(imageData, coord - 4), startColor, threshold)
         ) {
-          if (!reachedLeft) {
-            pixelStack.push({ x: x - 1, y });
+          if (!reachedLeft && !visited[getIndex(x - 1, y)]) {
+            pixelStack.push({ x: x - 1, y: y });
+            visited[getIndex(x - 1, y)] = 1;
             reachedLeft = true;
           }
         } else if (reachedLeft) {
@@ -84,13 +88,14 @@ function bucketFill(
         }
       }
 
-      // Move as far right as possible before a different colored pixel is reached
+      // Check right neighboring pixel
       if (x < width - 1) {
         if (
           doColorsMatch(getColor(imageData, coord + 4), startColor, threshold)
         ) {
-          if (!reachedRight) {
-            pixelStack.push({ x: x + 1, y });
+          if (!reachedRight && !visited[getIndex(x + 1, y)]) {
+            pixelStack.push({ x: x + 1, y: y });
+            visited[getIndex(x + 1, y)] = 1;
             reachedRight = true;
           }
         } else if (reachedRight) {
@@ -105,9 +110,6 @@ function bucketFill(
 
   // Take the newly filled image data and push it to the canvas!
   context.putImageData(imageData, 0, 0);
-
-  // Bucket fill was a success, store the command in command history
-  return true;
 }
 
 // Bucket Tool
@@ -115,11 +117,11 @@ export class Bucket extends Tool {
   success: boolean = false;
   threshold: number = $state(0);
 
-  // Attempt to flood fill all pixels with matching color (in relation to threshold), and store command on success
+  // Flood fill all pixels with matching color (in relation to threshold) and store command
   startUse(canvas: HTMLCanvasElement, x: number, y: number): void {
     this.storePreviousImageData(canvas);
-    if (bucketFill(canvas, x, y, this.color as string, this.threshold))
-      this.storeCommand(canvas);
+    bucketFill(canvas, x, y, this.color as string, this.threshold);
+    this.storeCommand(canvas);
   }
 
   constructor(
