@@ -67,6 +67,17 @@ export function getColorHexXY(
   return colorToHex(getColorXY(canvas, x, y));
 }
 
+// Returns the complementary color of the passed-in color
+export function getComplementary(color: Color | string): Color | string {
+  if (color instanceof Color)
+    return new Color(255 - color.r, 255 - color.g, 255 - color.b, color.a);
+  else {
+    const converted = hexToColor(color, 255);
+    const newColor = new Color(255 - converted.r, 255 - converted.g, 255 - converted.b, 255);
+    return colorToHex(newColor);
+  }
+}
+
 // Update color of pixel at linear coordinate to passed-in color (used in Bucket to update each relevant pixel's color)
 export function setColor(
   imageData: ImageData,
