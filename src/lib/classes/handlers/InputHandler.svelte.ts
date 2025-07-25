@@ -1,9 +1,9 @@
-import type { BrushHandler } from "$lib/classes/handlers/BrushHandler.svelte";
+import type { ToolHandler } from "$lib/classes/handlers/ToolHandler.svelte";
 import type { CommandHandler } from "$lib/classes/handlers/CommandHandler";
 
 export class InputHandler {
   commandHandler: CommandHandler;
-  brushHandler: BrushHandler;
+  toolHandler: ToolHandler;
 
   // Stores all the keys currently being pressed
   pressedKeys: Array<string> = [];
@@ -30,29 +30,29 @@ export class InputHandler {
       }
     } else {
       switch (keycode) {
-        // Enables brush with 'b'
+        // Enables paint brush with 'b'
         case "b":
-          this.brushHandler.setBrush(this.brushHandler.paintBrush);
+          this.toolHandler.setTool(this.toolHandler.paintBrush);
           break;
         // Enables eraser with 'e'
         case "e":
-          this.brushHandler.setBrush(this.brushHandler.eraser);
+          this.toolHandler.setTool(this.toolHandler.eraser);
           break;
         // Enables bucket with 'g'
         case "g":
-          this.brushHandler.setBrush(this.brushHandler.bucket);
+          this.toolHandler.setTool(this.toolHandler.bucket);
           break;
         // Enables eye dropper with 'i'
         case "i":
-          this.brushHandler.setBrush(this.brushHandler.eyeDropper);
+          this.toolHandler.setTool(this.toolHandler.eyeDropper);
           break;
-        // Increases current brush/eraser size with up arrow
+        // Increases current tool size with up arrow
         case "arrowup":
-          this.brushHandler.brush?.alterSize(1);
+          this.toolHandler.tool?.alterSize(1);
           break;
-        // Decreases current brush/eraser size with down arrow
+        // Decreases current tool size with down arrow
         case "arrowdown":
-          this.brushHandler.brush?.alterSize(-1);
+          this.toolHandler.tool?.alterSize(-1);
           break;
       }
     }
@@ -67,14 +67,14 @@ export class InputHandler {
   // Handles functionality with mouse scroll wheel
   onwheel(event: WheelEvent) {
     if (this.pressedKeys.includes("control")) {
-      // Allows for Ctrl+Scroll to change brush size (if brush uses size)
-      if (event.deltaY > 0) this.brushHandler.brush?.alterSize(1);
-      else this.brushHandler.brush?.alterSize(-1);
+      // Allows for Ctrl+Scroll to change tool size (if tool uses size)
+      if (event.deltaY > 0) this.toolHandler.tool?.alterSize(1);
+      else this.toolHandler.tool?.alterSize(-1);
     }
   }
 
-  constructor(commandHandler: CommandHandler, brushHandler: BrushHandler) {
+  constructor(commandHandler: CommandHandler, toolHandler: ToolHandler) {
     this.commandHandler = commandHandler;
-    this.brushHandler = brushHandler;
+    this.toolHandler = toolHandler;
   }
 }

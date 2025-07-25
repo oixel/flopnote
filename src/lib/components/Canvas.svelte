@@ -1,29 +1,29 @@
 <script lang="ts">
   import { onMount } from "svelte";
 
-  import { BrushHandler } from "$lib/classes/handlers/BrushHandler.svelte";
+  import { ToolHandler } from "$lib/classes/handlers/ToolHandler.svelte";
 
   let {
     width,
     height,
-    brushHandler,
+    toolHandler,
   }: {
     width: number;
     height: number;
-    brushHandler: BrushHandler;
+    toolHandler: ToolHandler;
   } = $props();
 
-  let canvas: HTMLCanvasElement;
+  let canvas: HTMLCanvasElement = $state() as HTMLCanvasElement;
+ 
+  // Grab the current tool from the ToolHandler to apply hover style and access custom values
+  let tool = $derived(toolHandler.tool);
 
-  // Grab the current brush from the brush handler to apply hover style and access custom values
-  let brush = $derived(brushHandler.brush);
-
-  // Variables relating to active drawing
+  // Variables relating to active tool usage
   let isMouseDown = false;
   let offsetX: number;
   let offsetY: number;
 
-  // Allows for brush hovering while mouse is over canvas
+  // Allows for tool hovering while mouse is over canvas
   let isHovering = $state(false);
   let hoverPos = $state({ x: 0, y: 0 });
 
@@ -39,91 +39,97 @@
     offsetY = rect.y;
   }
 
-  // Toggle drawing on and grab line stroke's starting position
-  function startMouseDraw(event: MouseEvent) {
-    // Enable drawing mode
+  // Toggle mouseDown on and call tool's start functionality
+  function startUse(event: MouseEvent) {
+    // Update the mouseDown status
     isMouseDown = true;
 
-    // Add initial brush stroke to canvas
-    brushHandler.startUse(canvas, event.x - offsetX, event.y - offsetY);
+    // Call tool's start functionality on initial mouse click
+    toolHandler.startUse(canvas, event.x - offsetX, event.y - offsetY);
   }
 
-  // Handles drawing as mouse moves around canvas
-  function mouseDraw(event: MouseEvent) {
-    // Only draw line strokes if mouse is held down
+  // Handles tool usage as mouse moves around canvas
+  function use(event: MouseEvent) {
+    // Only use tool if mouse is actively held down
     if (isMouseDown) {
       // Grab current mouse position with consideration for offset
       const x = event.x - offsetX;
       const y = event.y - offsetY;
 
-      brushHandler.dragUse(canvas, x, y);
+      toolHandler.dragUse(canvas, x, y);
     }
   }
 
-  // Toggle drawing off when mouse is released
-  function endDraw(event: MouseEvent) {
+  // Toggle mouseDown off when mouse is released and call tool's end functionality
+  function endUse(event: MouseEvent) {
     if (isMouseDown) {
       isMouseDown = false;
 
-      // Add final points of brush stroke to canvas
-      brushHandler.endUse(canvas, event.x - offsetX, event.y - offsetY);
+      // Call tool's end functionality when mouse is released 
+      toolHandler.endUse(canvas, event.x - offsetX, event.y - offsetY);
     }
   }
 
-  // Provides brush hovering support for wherever the mouse is located
+  //
+  // DELETE THIS
+  //
+  // Provides tool hovering support for wherever the mouse is located
   function handleMouseHover(event: MouseEvent) {
     // Apply an offset if brush is being used instead of eraser (due to how brush draws)
     let brushOffset =
-      brush?.name == "Paint Brush" && brush.size
-        ? (brush?.size / 2) * Number(brush?.name == "Paint Brush")
+      tool?.name == "Paint Brush" && tool.size
+        ? (tool?.size / 2) * Number(tool?.name == "Paint Brush")
         : 0;
     hoverPos = { x: event.x - brushOffset, y: event.y - brushOffset };
   }
+  //
+  //
+  //
 </script>
 
 <!-- Update offset whenever the window's size is changed -->
-<!-- And Handle drawing as mouse is pressed and moved around the window -->
+<!-- And handle tool usage as mouse is pressed/released and moved around the window -->
 <svelte:window
   onresize={setOffset}
   {onkeydown}
-  onmouseup={endDraw}
-  onmousemove={mouseDraw}
+  onmouseup={endUse}
+  onmousemove={use}
 />
 
-<!-- Track mouse position to place brush hover where mouse is -->
+<!-- Track mouse position to place tool hover where mouse is -->
 <svelte:document onmousemove={handleMouseHover} />
 
-{#if brush}
-  <!-- Renders brush/eraser wherever mouse is hovering on canvas-->
+{#if tool}
+  <!-- Renders tool wherever mouse is hovering on canvas-->
   <div
     style={`
         left: ${hoverPos.x}px;
         top: ${hoverPos.y}px; 
-        width: ${brush.size}px; 
-        height: ${brush.size}px;
-        background-color: ${brush.color ? brushHandler.color : ""};
-        opacity: ${brush.opacity ? `${(brush.opacity * 100) / 255}%` : "100%"};
+        width: ${tool.size}px; 
+        height: ${tool.size}px;
+        background-color: ${tool.color ? toolHandler.color : ""};
+        opacity: ${tool.opacity ? `${(tool.opacity * 100) / 255}%` : "100%"};
     `}
     class="{isHovering
       ? 'visible'
-      : 'hidden'} {brush.hoverStyle} fixed pointer-events-none"
+      : 'hidden'} {tool.hoverStyle} fixed pointer-events-none"
   ></div>
 
   <canvas
     {width}
     {height}
     bind:this={canvas}
-    onmousedown={startMouseDraw}
+    onmousedown={startUse}
     onmouseenter={() => {
-      // Only allow brush hovering while cursor is in the bounds of the canvas
+      // Only allow tool hovering while cursor is in the bounds of the canvas
       isHovering = true;
     }}
     onmouseleave={() => {
-      // Turn off brush hovering when mouse exits the canvas' bounds
+      // Turn off tool hovering when mouse exits the canvas' bounds
       isHovering = false;
     }}
-    class="rounded-md border-2 {brush?.cursor}"
-    style="background-color: {brushHandler.backgroundColor};"
+    class="rounded-md border-2 {tool?.cursor}"
+    style="background-color: {toolHandler.backgroundColor};"
   >
   </canvas>
 {/if}

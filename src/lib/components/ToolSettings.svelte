@@ -2,7 +2,7 @@
   import type { Tool } from "$lib/classes/Tool.svelte";
   import { Bucket } from "$lib/classes/tools/Bucket.svelte";
 
-  let { brush = $bindable() }: { brush: Tool } = $props();
+  let { tool = $bindable() }: { tool: Tool } = $props();
 </script>
 
 <div
@@ -11,51 +11,51 @@
   <!-- Displays currently selected tool -->
   <p class="">
     <b>Tool:</b>
-    {brush.name}
+    {tool.name}
   </p>
 
   <!-- Size slider for tools that use it -->
-  {#if brush.size}
+  {#if tool.size}
     <p class="border-t-2 border-dashed w-full mt-2 pt-2">
       <b>Size:</b>
-      {brush.size}
+      {tool.size}
     </p>
 
     <input
       type="range"
       min="1"
-      max={brush.maxSize}
-      bind:value={brush.size}
+      max={tool.maxSize}
+      bind:value={tool.size}
       class="cursor-pointer"
     />
   {/if}
 
   <!-- Opacity slider for tools that use it -->
-  {#if brush.opacity}
+  {#if tool.opacity}
     <p>
       <b>Opacity:</b>
-      {brush.opacity}
+      {tool.opacity}
     </p>
     <input
       type="range"
       min="1"
       max="255"
-      bind:value={brush.opacity}
+      bind:value={tool.opacity}
       class="cursor-pointer"
     />
   {/if}
 
   <!-- Threshold slider for bucket tool -->
-  {#if brush instanceof Bucket}
+  {#if tool instanceof Bucket}
     <p>
       <b>Threshold:</b>
-      {brush.threshold}
+      {tool.threshold}
     </p>
     <input
       type="range"
       min="0"
       max="120"
-      bind:value={brush.threshold}
+      bind:value={tool.threshold}
       class="cursor-pointer"
     />
   {/if}

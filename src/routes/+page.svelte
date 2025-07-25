@@ -1,7 +1,7 @@
 <script lang="ts">
   import Canvas from "$lib/components/Canvas.svelte";
-  import { BrushHandler } from "$lib/classes/handlers/BrushHandler.svelte";
-  import BrushSettings from "$lib/components/BrushSettings.svelte";
+  import { ToolHandler } from "$lib/classes/handlers/ToolHandler.svelte";
+  import ToolSettings from "$lib/components/ToolSettings.svelte";
   import { CommandHandler } from "$lib/classes/handlers/CommandHandler";
   import { InputHandler } from "$lib/classes/handlers/InputHandler.svelte";
   import ColorPicker from "$lib/components/ColorPicker.svelte";
@@ -14,11 +14,11 @@
   // Instantiate a CommandHandler to allow for undo/redo
   const commandHandler = new CommandHandler();
 
-  const brushHandler = new BrushHandler(commandHandler); // Manages the current brush and data across all brushes
-  let brush = $derived(brushHandler.brush); // Grab the current brush from the brush handler to avoid having to do brushHandler.brush every time I desire to access it
+  const toolHandler = new ToolHandler(commandHandler); // Manages the current tool and data across all tools
+  let tool = $derived(toolHandler.tool); // Grab the current tool from the tool handler to avoid having to do toolHandler.tool every time I desire to access it
 
   // Instantiate an InputHandler to allow for keyboard shortcuts
-  const inputHandler = new InputHandler(commandHandler, brushHandler);
+  const inputHandler = new InputHandler(commandHandler, toolHandler);
 </script>
 
 <svelte:window
@@ -27,7 +27,7 @@
   onwheel={(event) => inputHandler.onwheel(event)}
 />
 
-{#if brush}
+{#if tool}
   <div
     class="fixed w-full h-full flex flex-col overflow-hidden overscroll-none touch-none select-none cursor-default"
   >
@@ -43,17 +43,17 @@
       ></div>
 
       <!-- The canvas which the user draws on -->
-      <Canvas width={canvasWidth} height={canvasHeight} {brushHandler} />
+      <Canvas width={canvasWidth} height={canvasHeight} {toolHandler} />
 
       <!-- Tools to the right side of the canvas -->
       <div
         class="grow w-full mx-auto md:mx-2 flex flex-col h-full justify-center items-start gap-2"
       >
-        {#if brush.color || brush.name == "Eye Dropper"}
-          <ColorPicker bind:color={brushHandler.color} />
-          <RecentColors {brushHandler} />
+        {#if tool.color || tool.name == "Eye Dropper"}
+          <ColorPicker bind:color={toolHandler.color} />
+          <RecentColors {toolHandler} />
         {/if}
-        <BrushSettings bind:brush />
+        <ToolSettings bind:tool={tool} />
       </div>
     </div>
   </div>

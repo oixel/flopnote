@@ -9,23 +9,23 @@ export class Tool {
 
   commandHandler?: CommandHandler;
 
-  size: number | null = $state(null); // Optional: some brushes don't need a size (e.g. Bucket)
+  size: number | null = $state(null); // Optional: some tools don't need a size (e.g. Bucket)
   maxSize: number = 100;
 
-  color: string | null = $state(null); // Optional: some brushes don't need colors (e.g. Eraser)
-  opacity: number | null = $state(null); // Optional: some brushes don't need opacity (e.g. Eye Dropper)
+  color: string | null = $state(null); // Optional: some tools don't need colors (e.g. Eraser)
+  opacity: number | null = $state(null); // Optional: some tools don't need opacity (e.g. Eye Dropper)
 
   cursor: string = "cursor-none"; // Sets the mouse cursor's icon while hovering over canvas
-  hoverStyle: string; // Appearance of brush while hovering over canvas
+  hoverStyle: string; // Appearance of tool while hovering over canvas
 
   previousImageData?: ImageData;
 
-  // Alter the brush's current size based on the parameter
+  // Alter the tool's current size based on the parameter
   alterSize(change: number): void {
     if (this.size) {
       this.size += change;
 
-      // Enforce a minimum and maximum for the brush size
+      // Enforce a minimum and maximum for the tool size
       if (this.size < 1) this.size = 1;
       else if (this.size > this.maxSize) this.size = this.maxSize;
     }
@@ -46,7 +46,7 @@ export class Tool {
     return;
   }
 
-  // Grab image data BEFORE drawing, so it can be re-applied on RenderCommand's undo()
+  // Grab image data BEFORE using tool to allow for RenderCommand's undo()
   storePreviousImageData(canvas: HTMLCanvasElement): void {
     const context = canvas.getContext("2d") as CanvasRenderingContext2D;
 
@@ -58,7 +58,7 @@ export class Tool {
     );
   }
 
-  // Append current draw command to the command timeline
+  // Append canvas changes to the command timeline
   storeCommand(canvas: HTMLCanvasElement): void {
     if (this.previousImageData && this.commandHandler) {
       const command = new RenderCommand(canvas, this.previousImageData);
