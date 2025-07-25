@@ -93,35 +93,37 @@
 <!-- Track mouse position to place brush hover where mouse is -->
 <svelte:document onmousemove={handleMouseHover} />
 
-<!-- Renders brush/eraser wherever mouse is hovering on canvas-->
-<div
-  style={`
+{#if brush}
+  <!-- Renders brush/eraser wherever mouse is hovering on canvas-->
+  <div
+    style={`
         left: ${hoverPos.x}px;
         top: ${hoverPos.y}px; 
-        width: ${brush?.size}px; 
-        height: ${brush?.size}px;
-        background-color: ${brush?.color ? brushHandler.color : ""};
-        opacity: ${brush?.opacity ? `${(brush.opacity * 100) / 255}%` : "100%"};
+        width: ${brush.size}px; 
+        height: ${brush.size}px;
+        background-color: ${brush.color ? brushHandler.color : ""};
+        opacity: ${brush.opacity ? `${(brush.opacity * 100) / 255}%` : "100%"};
     `}
-  class="{isHovering
-    ? 'visible'
-    : 'hidden'} {brush?.hoverStyle} fixed pointer-events-none"
-></div>
+    class="{isHovering
+      ? 'visible'
+      : 'hidden'} {brush.hoverStyle} fixed pointer-events-none"
+  ></div>
 
-<canvas
-  {width}
-  {height}
-  bind:this={canvas}
-  onmousedown={startMouseDraw}
-  onmouseenter={() => {
-    // Only allow brush hovering while cursor is in the bounds of the canvas
-    isHovering = true;
-  }}
-  onmouseleave={() => {
-    // Turn off brush hovering when mouse exits the canvas' bounds
-    isHovering = false;
-  }}
-  class="rounded-md border-2 {brush?.cursor}"
-  style="background-color: {brushHandler.backgroundColor};"
->
-</canvas>
+  <canvas
+    {width}
+    {height}
+    bind:this={canvas}
+    onmousedown={startMouseDraw}
+    onmouseenter={() => {
+      // Only allow brush hovering while cursor is in the bounds of the canvas
+      isHovering = true;
+    }}
+    onmouseleave={() => {
+      // Turn off brush hovering when mouse exits the canvas' bounds
+      isHovering = false;
+    }}
+    class="rounded-md border-2 {brush?.cursor}"
+    style="background-color: {brushHandler.backgroundColor};"
+  >
+  </canvas>
+{/if}
