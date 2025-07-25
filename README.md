@@ -12,7 +12,7 @@ To run basic Svelte project use `npm run dev` to run in application (Tauri) mode
   - [x] Brush colors
   - [x] Brush sizes
 - [x] Add brush hovering over canvas
-- [ ] Recently used colors
+- [x] Recently used colors
 - [x] Proper undo / redo system (Command Handler)
 - [ ] Time lapse
 - [ ] Add layer support (max of 10 layers + 1 background)
