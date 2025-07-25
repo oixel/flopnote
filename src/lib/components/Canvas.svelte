@@ -103,7 +103,7 @@
         width: ${brush?.size}px; 
         height: ${brush?.size}px;
         background-color: ${brush?.color ? brushHandler.color : ""};
-        opacity: ${brush?.opacity ? `${brush.opacity}%` : "100%"};
+        opacity: ${brush?.opacity ? `${(brush.opacity * 100) / 255}%` : "100%"};
     `}
   class="{isHovering
     ? 'visible'

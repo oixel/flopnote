@@ -1,8 +1,10 @@
 <script lang="ts">
   import Canvas from "$lib/components/Canvas.svelte";
   import { BrushHandler } from "$lib/scripts/BrushHandler.svelte";
+  import BrushSettings from "$lib/components/BrushSettings.svelte";
   import { CommandHandler } from "$lib/scripts/CommandHandler";
   import { InputHandler } from "$lib/scripts/InputHandler.svelte";
+  import ColorPicker from "$lib/components/ColorPicker.svelte";
 
   // Define canvas dimensions
   const canvasWidth = 500;
@@ -10,11 +12,12 @@
 
   // Instantiate a CommandHandler to allow for undo/redo
   const commandHandler = new CommandHandler();
-  const brushHandler = new BrushHandler(commandHandler);
-  const inputHandler = new InputHandler(commandHandler, brushHandler);
 
-  //
-  let brush = $derived(brushHandler.brush);
+  const brushHandler = new BrushHandler(commandHandler); // Manages the current brush and data across all brushes
+  let brush = $derived(brushHandler.brush); // Grab the current brush from the brush handler to avoid having to do brushHandler.brush every time I desire to access it
+
+  // Instantiate an InputHandler to allow for keyboard shortcuts
+  const inputHandler = new InputHandler(commandHandler, brushHandler);
 </script>
 
 <svelte:window
@@ -35,45 +38,7 @@
     <div class="flex justify-center items-center bg-blue-200 h-full grow">
       <!-- Tools to the left of the canvas -->
       <div class="grow w-full flex flex-col items-end">
-        <div
-          class="min-w-38 max-w-38 p-2 mx-auto md:mx-2 flex flex-col justify-center items-center bg-blue-900 text-white rounded-md border-2 border-white text-center"
-        >
-          <!-- Displays currently selected tool -->
-          <p class="">
-            <b>Tool:</b>
-            {brush.name}
-          </p>
-
-          <!-- Displays currently selected tool's size (if it uses one) -->
-          {#if brush.size}
-            <p class="border-t-2 w-full mt-2 pt-2">
-              <b>Size:</b>
-              {brush.size}
-            </p>
-
-            <input
-              type="range"
-              min="1"
-              max={brush.maxSize}
-              bind:value={brush.size}
-              class="cursor-pointer"
-            />
-          {/if}
-
-          {#if brush.opacity}
-            <p>
-              <b>Opacity:</b>
-              {brush.opacity}
-            </p>
-            <input
-              type="range"
-              min="1"
-              max="100"
-              bind:value={brush.opacity}
-              class="cursor-pointer"
-            />
-          {/if}
-        </div>
+        <BrushSettings bind:brush={brush} />
       </div>
 
       <!-- The canvas which the user draws on -->
@@ -84,21 +49,7 @@
         class="grow w-full h-[{canvasHeight}px] flex flex-col justify-start items-start"
       >
         {#if brush.color || brush.name == "Eye Dropper"}
-          <!-- Color Picker -->
-          <div
-            class="w-9/10 max-w-48 p-2 mx-auto md:mx-2 flex flex-col rounded-md border-2 bg-white"
-          >
-            <input
-              type="color"
-              bind:value={brushHandler.color}
-              class="w-full h-full rounded-xl aspect-square style cursor-pointer border-solid hover:scale-102 transition-all duration-100"
-            />
-            <input
-              type="text"
-              bind:value={brushHandler.color}
-              class="w-full text-center pt-1"
-            />
-          </div>
+          <ColorPicker bind:color={brushHandler.color} />
         {/if}
       </div>
     </div>

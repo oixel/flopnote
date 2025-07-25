@@ -67,7 +67,7 @@ export function getColorHex(imageData: ImageData, coord: number): string {
   return colorToHex(getColor(imageData, coord));
 }
 
-// Return a hex string represnting the color of the pixel at the given cartesian coordinate
+// Return a hex string representing the color of the pixel at the given cartesian coordinate
 export function getColorHexXY(canvas: HTMLCanvasElement, x: number, y: number): string {
   return colorToHex(getColorXY(canvas, x, y));
 }
@@ -87,7 +87,7 @@ export function setColor(
 }
 
 // Take two Color instances and compare them
-export function compareColors(colorA: Color, colorB: Color, threshold: number = 5): boolean {
+export function compareColors(colorA: Color, colorB: Color, threshold: number = 10): boolean {
   // Allows for semi-similar colors to be filled
   function inThreshold(numA: number, numB: number, threshold: number): boolean {
     return Math.abs(numA - numB) < threshold;

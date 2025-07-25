@@ -13,7 +13,7 @@ export function bucketFill(
   y: number,
   color: string
 ): boolean {
-  console.log(x, y)
+  // Store canvas data in variables for cleaner code
   const width = canvas.width;
   const height = canvas.height;
   const context = canvas.getContext("2d") as CanvasRenderingContext2D;
