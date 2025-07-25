@@ -17,6 +17,7 @@ export class BrushHandler {
 
   // Store selected color in BrushHandler so all brushes that use color have the same, universal color
   color: string = $state("#000000");
+  recentColors: Array<string> = $state([]);
 
   // Store the background layer's color to allow the eye dropper to return it if nothing else is hit
   backgroundColor: string = $state("#ffffff");
@@ -29,11 +30,22 @@ export class BrushHandler {
     if (brush.color) brush.color = this.color;
   }
 
+  // Append any NEW, used color to the array of recent colors
+  addColorToRecent(color: string): void {
+    if (!this.recentColors.includes(color)) {
+      this.recentColors.unshift(color);
+      this.recentColors.splice(5);
+    }
+  }
+
   // Applies universal color to brushes that need it, and serves as a controller for current brush's startDraw()
   startUse(canvas: HTMLCanvasElement, x: number, y: number): void {
     if (this.brush) {
-      // Apply current universal color to brush (if it uses colors)
-      if (this.brush.color) this.brush.color = this.color;
+      // Apply current universal color to brush (if it uses colors) and append the used color to array of recent (if it isn't already in the array)
+      if (this.brush.color) {
+        this.brush.color = this.color;
+        this.addColorToRecent(this.color);
+      }
 
       // Call the brush's start draw functionality
       const output = this.brush.startUse(canvas, x, y);

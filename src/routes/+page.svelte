@@ -5,6 +5,7 @@
   import { CommandHandler } from "$lib/classes/handlers/CommandHandler";
   import { InputHandler } from "$lib/classes/handlers/InputHandler.svelte";
   import ColorPicker from "$lib/components/ColorPicker.svelte";
+  import RecentColors from "$lib/components/RecentColors.svelte";
 
   // Define canvas dimensions
   const canvasWidth = 500;
@@ -46,10 +47,11 @@
 
       <!-- Tools to the right side of the canvas -->
       <div
-        class="grow w-full flex flex-col h-full justify-center items-start gap-2"
+        class="grow w-full mx-auto md:mx-2 flex flex-col h-full justify-center items-start gap-2"
       >
         {#if brush.color || brush.name == "Eye Dropper"}
           <ColorPicker bind:color={brushHandler.color} />
+          <RecentColors {brushHandler} />
         {/if}
         <BrushSettings bind:brush />
       </div>
