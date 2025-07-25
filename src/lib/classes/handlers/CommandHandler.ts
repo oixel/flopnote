@@ -1,4 +1,4 @@
-import { Command } from "./Commands";
+import { Command } from "$lib/classes/Command";
 
 export class CommandHandler {
   pointer: number = 0;
@@ -21,14 +21,14 @@ export class CommandHandler {
   redo() {
     if (this.pointer < this.commands.length) {
       this.commands[this.pointer].redo();
-      this.pointer += 1;
+      this.pointer++;
     }
   }
 
   // Calls undo function on the previous command (if one exists)
   undo() {
     if (this.pointer > 0) {
-      this.pointer -= 1;
+      this.pointer--;
       this.commands[this.pointer].undo();
     }
   }

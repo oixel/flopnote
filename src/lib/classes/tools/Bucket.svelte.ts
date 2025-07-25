@@ -1,13 +1,17 @@
+import { Tool } from "$lib/classes/Tool.svelte";
+import type { Color } from "$lib/classes/Color";
+
 import {
-  Color,
   hexToColor,
   getColor,
   setColor,
   doColorsMatch,
 } from "$lib/scripts/ColorTools";
 
+import type { CommandHandler } from "$lib/classes/handlers/CommandHandler";
+
 // A combined iterative / recursive flood fill algorithm based on https://www.williammalone.com/articles/html5-canvas-javascript-paint-bucket-tool/
-export function bucketFill(
+function bucketFill(
   canvas: HTMLCanvasElement,
   x: number,
   y: number,
@@ -44,12 +48,15 @@ export function bucketFill(
     coord = (y * width + x) * 4;
 
     // Move to furthest upwards point that matches the starting color
-    while (y-- >= 0 && doColorsMatch(getColor(imageData, coord), startColor, threshold)) {
+    while (
+      y-- >= 0 &&
+      doColorsMatch(getColor(imageData, coord), startColor, threshold)
+    ) {
       coord -= width * 4;
     }
 
     coord += width * 4;
-    y += 1;
+    y++;
 
     // Prevent looping past furthest left / right point
     let reachedLeft = false;
@@ -65,7 +72,9 @@ export function bucketFill(
 
       // Move as far left as possible before a different colored pixel is reached
       if (x > 0) {
-        if (doColorsMatch(getColor(imageData, coord - 4), startColor, threshold)) {
+        if (
+          doColorsMatch(getColor(imageData, coord - 4), startColor, threshold)
+        ) {
           if (!reachedLeft) {
             pixelStack.push({ x: x - 1, y });
             reachedLeft = true;
@@ -77,7 +86,9 @@ export function bucketFill(
 
       // Move as far right as possible before a different colored pixel is reached
       if (x < width - 1) {
-        if (doColorsMatch(getColor(imageData, coord + 4), startColor, threshold)) {
+        if (
+          doColorsMatch(getColor(imageData, coord + 4), startColor, threshold)
+        ) {
           if (!reachedRight) {
             pixelStack.push({ x: x + 1, y });
             reachedRight = true;
@@ -97,4 +108,28 @@ export function bucketFill(
 
   // Bucket fill was a success, store the command in command history
   return true;
+}
+
+// Bucket Tool
+export class Bucket extends Tool {
+  success: boolean = false;
+  threshold: number = $state(0);
+
+  // Attempt to flood fill all pixels with matching color (in relation to threshold), and store command on success
+  startUse(canvas: HTMLCanvasElement, x: number, y: number): void {
+    this.storePreviousImageData(canvas);
+    if (bucketFill(canvas, x, y, this.color as string, this.threshold))
+      this.storeCommand(canvas);
+  }
+
+  constructor(
+    commandHandler: CommandHandler,
+    color: string,
+    threshold: number
+  ) {
+    super("Bucket", commandHandler);
+    this.color = color;
+    this.threshold = threshold;
+    this.hoverStyle = "w-5 h-5";
+  }
 }

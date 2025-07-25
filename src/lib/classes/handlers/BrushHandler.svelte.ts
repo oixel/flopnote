@@ -1,16 +1,15 @@
-import {
-  Brush,
-  Bucket,
-  Eraser,
-  EyeDropper,
-  PaintBrush,
-} from "./Brushes.svelte";
-import type { CommandHandler } from "./CommandHandler";
+import type { Tool } from "$lib/classes/Tool.svelte";
+import { Bucket } from "$lib/classes/tools/Bucket.svelte";
+import { Eraser } from "$lib/classes/tools/Eraser.svelte";
+import { EyeDropper } from "$lib/classes/tools/EyeDropper.svelte";
+import { PaintBrush } from "$lib/classes/tools/PaintBrush.svelte";
+import { CommandHandler } from "$lib/classes/handlers/CommandHandler";
 
 export class BrushHandler {
   // Tracks the currently selected brush
-  brush: Brush | undefined = $state();
+  brush: Tool | undefined = $state();
 
+  // All the different tool options
   paintBrush: PaintBrush;
   eraser: Eraser;
   bucket: Bucket;
@@ -23,21 +22,21 @@ export class BrushHandler {
   backgroundColor: string = $state("#ffffff");
 
   // Change currently selected brush
-  setBrush(brush: Brush): void {
+  setBrush(brush: Tool): void {
     this.brush = brush;
 
     // Ensure newly selected brush uses the universally selected color
-    brush.changeColor(this.color);
+    if (brush.color) brush.color = this.color;
   }
 
   // Applies universal color to brushes that need it, and serves as a controller for current brush's startDraw()
-  startDraw(canvas: HTMLCanvasElement, x: number, y: number): void {
+  startUse(canvas: HTMLCanvasElement, x: number, y: number): void {
     if (this.brush) {
       // Apply current universal color to brush (if it uses colors)
       if (this.brush.color) this.brush.color = this.color;
 
       // Call the brush's start draw functionality
-      const output = this.brush.startDraw(canvas, x, y);
+      const output = this.brush.startUse(canvas, x, y);
 
       // Allows eye dropper tool to work
       if (typeof output === "string") this.color = output;
@@ -45,13 +44,13 @@ export class BrushHandler {
   }
 
   // Serves as a controller for current brush's draw()
-  draw(canvas: HTMLCanvasElement, x: number, y: number): void {
-    this.brush?.draw(canvas, x, y);
+  dragUse(canvas: HTMLCanvasElement, x: number, y: number): void {
+    this.brush?.dragUse(canvas, x, y);
   }
 
   // Serves as a controller for current brush's endDraw()
-  endDraw(canvas: HTMLCanvasElement, x: number, y: number): void {
-    this.brush?.endDraw(canvas, x, y);
+  endUse(canvas: HTMLCanvasElement, x: number, y: number): void {
+    this.brush?.endUse(canvas, x, y);
   }
 
   constructor(commandHandler: CommandHandler) {

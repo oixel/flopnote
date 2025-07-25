@@ -1,5 +1,5 @@
-import type { BrushHandler } from "./BrushHandler.svelte";
-import type { CommandHandler } from "./CommandHandler";
+import type { BrushHandler } from "$lib/classes/handlers/BrushHandler.svelte";
+import type { CommandHandler } from "$lib/classes/handlers/CommandHandler";
 
 export class InputHandler {
   commandHandler: CommandHandler;
@@ -48,11 +48,11 @@ export class InputHandler {
           break;
         // Increases current brush/eraser size with up arrow
         case "arrowup":
-          this.brushHandler.brush?.changeSize(1);
+          this.brushHandler.brush?.alterSize(1);
           break;
         // Decreases current brush/eraser size with down arrow
         case "arrowdown":
-          this.brushHandler.brush?.changeSize(-1);
+          this.brushHandler.brush?.alterSize(-1);
           break;
       }
     }
@@ -68,8 +68,8 @@ export class InputHandler {
   onwheel(event: WheelEvent) {
     if (this.pressedKeys.includes("control")) {
       // Allows for Ctrl+Scroll to change brush size (if brush uses size)
-      if (event.deltaY > 0) this.brushHandler.brush?.changeSize(1);
-      else this.brushHandler.brush?.changeSize(-1);
+      if (event.deltaY > 0) this.brushHandler.brush?.alterSize(1);
+      else this.brushHandler.brush?.alterSize(-1);
     }
   }
 

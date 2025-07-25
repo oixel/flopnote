@@ -1,11 +1,12 @@
 <script lang="ts">
-  import { Bucket, type Brush } from "$lib/scripts/Brushes.svelte";
+  import type { Tool } from "$lib/classes/Tool.svelte";
+  import { Bucket } from "$lib/classes/tools/Bucket.svelte";
 
-  let { brush = $bindable() }: { brush: Brush } = $props();
+  let { brush = $bindable() }: { brush: Tool } = $props();
 </script>
 
 <div
-  class="min-w-38 max-w-38 p-2 mx-auto md:mx-2 flex flex-col justify-center items-center bg-blue-900 text-white rounded-md border-2 border-white text-center"
+  class="w-9/10 min-w-38 max-w-48 p-2 mx-auto md:mx-2 flex flex-col justify-center items-center bg-blue-900 text-white rounded-md border-2 border-white text-center"
 >
   <!-- Displays currently selected tool -->
   <p class="">

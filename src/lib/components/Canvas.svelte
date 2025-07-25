@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
 
-  import { BrushHandler } from "$lib/scripts/BrushHandler.svelte";
+  import { BrushHandler } from "$lib/classes/handlers/BrushHandler.svelte";
 
   let {
     width,
@@ -19,15 +19,13 @@
   let brush = $derived(brushHandler.brush);
 
   // Variables relating to active drawing
-  let isDrawing = false;
+  let isMouseDown = false;
   let offsetX: number;
   let offsetY: number;
 
   // Allows for brush hovering while mouse is over canvas
   let isHovering = $state(false);
   let hoverPos = $state({ x: 0, y: 0 });
-
-  let canvasPosition = { x: 0, y: 0 };
 
   onMount(() => {
     setOffset();
@@ -44,31 +42,31 @@
   // Toggle drawing on and grab line stroke's starting position
   function startMouseDraw(event: MouseEvent) {
     // Enable drawing mode
-    isDrawing = true;
+    isMouseDown = true;
 
     // Add initial brush stroke to canvas
-    brushHandler.startDraw(canvas, event.x - offsetX, event.y - offsetY);
+    brushHandler.startUse(canvas, event.x - offsetX, event.y - offsetY);
   }
 
   // Handles drawing as mouse moves around canvas
   function mouseDraw(event: MouseEvent) {
     // Only draw line strokes if mouse is held down
-    if (isDrawing) {
+    if (isMouseDown) {
       // Grab current mouse position with consideration for offset
       const x = event.x - offsetX;
       const y = event.y - offsetY;
 
-      brushHandler.draw(canvas, x, y);
+      brushHandler.dragUse(canvas, x, y);
     }
   }
 
   // Toggle drawing off when mouse is released
   function endDraw(event: MouseEvent) {
-    if (isDrawing) {
-      isDrawing = false;
+    if (isMouseDown) {
+      isMouseDown = false;
 
       // Add final points of brush stroke to canvas
-      brushHandler.endDraw(canvas, event.x - offsetX, event.y - offsetY);
+      brushHandler.endUse(canvas, event.x - offsetX, event.y - offsetY);
     }
   }
 
@@ -122,10 +120,6 @@
   onmouseleave={() => {
     // Turn off brush hovering when mouse exits the canvas' bounds
     isHovering = false;
-  }}
-  onmousemove={(event: MouseEvent) => {
-    // Update the mouse's position relative to the canvas
-    canvasPosition = { x: event.offsetX, y: event.offsetY };
   }}
   class="rounded-md border-2 {brush?.cursor}"
   style="background-color: {brushHandler.backgroundColor};"

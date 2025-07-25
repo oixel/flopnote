@@ -1,17 +1,4 @@
-// Creates a class that simplifies handling color data
-export class Color {
-  r: number;
-  g: number;
-  b: number;
-  a: number;
-
-  constructor(r: number, g: number, b: number, a: number) {
-    this.r = r;
-    this.g = g;
-    this.b = b;
-    this.a = a;
-  }
-}
+import { Color } from "$lib/classes/Color";
 
 // Converts a hex string (used by color input) and alpha value into a Color object
 export function hexToColor(hex: string, alpha: number): Color {
@@ -55,8 +42,12 @@ export function getColor(imageData: ImageData, coord: number): Color {
 }
 
 // Returns a Color object of the pixel at the given cartesian coordinate
-export function getColorXY(canvas: HTMLCanvasElement, x: number, y: number): Color {
-  const context = canvas.getContext('2d') as CanvasRenderingContext2D;
+export function getColorXY(
+  canvas: HTMLCanvasElement,
+  x: number,
+  y: number
+): Color {
+  const context = canvas.getContext("2d") as CanvasRenderingContext2D;
   const imageData = context.getImageData(x, y, 1, 1).data;
 
   return new Color(imageData[0], imageData[1], imageData[2], imageData[3]);
@@ -68,11 +59,15 @@ export function getColorHex(imageData: ImageData, coord: number): string {
 }
 
 // Return a hex string representing the color of the pixel at the given cartesian coordinate
-export function getColorHexXY(canvas: HTMLCanvasElement, x: number, y: number): string {
+export function getColorHexXY(
+  canvas: HTMLCanvasElement,
+  x: number,
+  y: number
+): string {
   return colorToHex(getColorXY(canvas, x, y));
 }
 
-// Update color of pixel at linear coordinate to passed-in color
+// Update color of pixel at linear coordinate to passed-in color (used in Bucket to update each relevant pixel's color)
 export function setColor(
   imageData: ImageData,
   coord: number,
@@ -87,11 +82,15 @@ export function setColor(
 }
 
 // Returns whether two colors are the same in relation to a threshold
-export function doColorsMatch(colorA: Color, colorB: Color, threshold: number): boolean {
+export function doColorsMatch(
+  colorA: Color,
+  colorB: Color,
+  threshold: number
+): boolean {
   // Allows for semi-similar colors to be filled
   function inThreshold(numA: number, numB: number, threshold: number): boolean {
     return Math.abs(numA - numB) <= threshold;
-  };
+  }
 
   return (
     inThreshold(colorA.r, colorB.r, threshold) &&
