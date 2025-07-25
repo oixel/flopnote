@@ -191,17 +191,19 @@ export class Eraser extends Brush {
 // Bucket Tool
 export class Bucket extends Brush {
   success: boolean = false;
+  threshold: number = $state(0);
 
-  // Attempt to flood fill all pixels with matching color, and store command on success
+  // Attempt to flood fill all pixels with matching color (in relation to threshold), and store command on success
   startDraw(canvas: HTMLCanvasElement, x: number, y: number): void {
     this.setPreviousImageData(canvas);
-    if (bucketFill(canvas, x, y, this.color as string))
+    if (bucketFill(canvas, x, y, this.color as string, this.threshold))
       this.storeCommand(canvas);
   }
 
-  constructor(commandHandler: CommandHandler, color: string) {
+  constructor(commandHandler: CommandHandler, color: string, threshold: number) {
     super("Bucket", commandHandler);
     this.color = color;
+    this.threshold = threshold;
     this.hoverStyle = "w-5 h-5";
   }
 }

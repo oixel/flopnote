@@ -3,7 +3,7 @@ import {
   hexToColor,
   getColor,
   setColor,
-  compareColors,
+  doColorsMatch,
 } from "$lib/scripts/ColorTools";
 
 // A combined iterative / recursive flood fill algorithm based on https://www.williammalone.com/articles/html5-canvas-javascript-paint-bucket-tool/
@@ -11,7 +11,8 @@ export function bucketFill(
   canvas: HTMLCanvasElement,
   x: number,
   y: number,
-  color: string
+  color: string,
+  threshold: number
 ): boolean {
   // Store canvas data in variables for cleaner code
   const width = canvas.width;
@@ -28,8 +29,8 @@ export function bucketFill(
   const startColor: Color = getColor(imageData, coord);
   const fillColor: Color = hexToColor(color, 255);
 
-  // Prevent filling a color if it already matches
-  if (compareColors(startColor, fillColor)) return false;
+  // Prevent fill if clicked color is IDENTICAL to starting color
+  if (doColorsMatch(startColor, fillColor, 0)) return false;
 
   // Loops through all pixels that match the color of the start pixel
   while (pixelStack.length > 0) {
@@ -43,7 +44,7 @@ export function bucketFill(
     coord = (y * width + x) * 4;
 
     // Move to furthest upwards point that matches the starting color
-    while (y-- >= 0 && compareColors(getColor(imageData, coord), startColor)) {
+    while (y-- >= 0 && doColorsMatch(getColor(imageData, coord), startColor, threshold)) {
       coord -= width * 4;
     }
 
@@ -54,17 +55,17 @@ export function bucketFill(
     let reachedLeft = false;
     let reachedRight = false;
 
-    // Move downwards as long as the pixel's color is the same as the starting color
+    // Move downwards as long as the pixel's color is the same as the starting color (in relation to threshold)
     while (
       y++ < height &&
-      compareColors(getColor(imageData, coord), startColor)
+      doColorsMatch(getColor(imageData, coord), startColor, threshold)
     ) {
       // Fill the current pixel with the fill color!
       setColor(imageData, coord, fillColor);
 
       // Move as far left as possible before a different colored pixel is reached
       if (x > 0) {
-        if (compareColors(getColor(imageData, coord - 4), startColor)) {
+        if (doColorsMatch(getColor(imageData, coord - 4), startColor, threshold)) {
           if (!reachedLeft) {
             pixelStack.push({ x: x - 1, y });
             reachedLeft = true;
@@ -76,7 +77,7 @@ export function bucketFill(
 
       // Move as far right as possible before a different colored pixel is reached
       if (x < width - 1) {
-        if (compareColors(getColor(imageData, coord + 4), startColor)) {
+        if (doColorsMatch(getColor(imageData, coord + 4), startColor, threshold)) {
           if (!reachedRight) {
             pixelStack.push({ x: x + 1, y });
             reachedRight = true;
@@ -94,6 +95,6 @@ export function bucketFill(
   // Take the newly filled image data and push it to the canvas!
   context.putImageData(imageData, 0, 0);
 
-  // Bucket fill was a success!
+  // Bucket fill was a success, store the command in command history
   return true;
 }

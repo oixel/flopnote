@@ -58,7 +58,7 @@ export class BrushHandler {
     // Instantiate all the different brushes
     this.paintBrush = new PaintBrush(commandHandler, 3, this.color, 255);
     this.eraser = new Eraser(commandHandler, 8);
-    this.bucket = new Bucket(commandHandler, this.color);
+    this.bucket = new Bucket(commandHandler, this.color, 10);
     this.eyeDropper = new EyeDropper(this.backgroundColor);
 
     // Initialize selected brush to be regular paint brush

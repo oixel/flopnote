@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Brush } from "$lib/scripts/Brushes.svelte";
+  import { Bucket, type Brush } from "$lib/scripts/Brushes.svelte";
 
   let { brush = $bindable() }: { brush: Brush } = $props();
 </script>
@@ -13,7 +13,7 @@
     {brush.name}
   </p>
 
-  <!-- Displays currently selected tool's size (if it uses one) -->
+  <!-- Size slider for tools that use it -->
   {#if brush.size}
     <p class="border-t-2 border-dashed w-full mt-2 pt-2">
       <b>Size:</b>
@@ -29,6 +29,7 @@
     />
   {/if}
 
+  <!-- Opacity slider for tools that use it -->
   {#if brush.opacity}
     <p>
       <b>Opacity:</b>
@@ -39,6 +40,21 @@
       min="1"
       max="255"
       bind:value={brush.opacity}
+      class="cursor-pointer"
+    />
+  {/if}
+
+  <!-- Threshold slider for bucket tool -->
+  {#if brush instanceof Bucket}
+    <p>
+      <b>Threshold:</b>
+      {brush.threshold}
+    </p>
+    <input
+      type="range"
+      min="0"
+      max="120"
+      bind:value={brush.threshold}
       class="cursor-pointer"
     />
   {/if}

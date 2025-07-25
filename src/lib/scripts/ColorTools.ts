@@ -86,11 +86,11 @@ export function setColor(
   data[coord + 3] = color.a;
 }
 
-// Take two Color instances and compare them
-export function compareColors(colorA: Color, colorB: Color, threshold: number = 10): boolean {
+// Returns whether two colors are the same in relation to a threshold
+export function doColorsMatch(colorA: Color, colorB: Color, threshold: number): boolean {
   // Allows for semi-similar colors to be filled
   function inThreshold(numA: number, numB: number, threshold: number): boolean {
-    return Math.abs(numA - numB) < threshold;
+    return Math.abs(numA - numB) <= threshold;
   };
 
   return (
