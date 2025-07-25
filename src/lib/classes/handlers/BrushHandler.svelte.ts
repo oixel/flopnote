@@ -32,16 +32,21 @@ export class BrushHandler {
 
   // Append any NEW, used color to the array of recent colors
   addColorToRecent(color: string): void {
-    if (!this.recentColors.includes(color)) {
-      this.recentColors.unshift(color);
-      this.recentColors.splice(5);
-    }
+    // Avoid updating array if the color has not changed
+    if (this.recentColors[0] == color) return;
+
+    // If color is already exists in the array, remove it so it shows up at the beginning instead
+    if (this.recentColors.includes(color))
+      this.recentColors.splice(this.recentColors.indexOf(color), 1);
+
+    this.recentColors.unshift(color); // Add color to beginning of array
+    this.recentColors.splice(5); // Remove any colors that go beyond the limit of 5
   }
 
   // Applies universal color to brushes that need it, and serves as a controller for current brush's startDraw()
   startUse(canvas: HTMLCanvasElement, x: number, y: number): void {
     if (this.brush) {
-      // Apply current universal color to brush (if it uses colors) and append the used color to array of recent (if it isn't already in the array)
+      // Apply current universal color to brush (if it uses colors) and attempt to append the used color to array of recent
       if (this.brush.color) {
         this.brush.color = this.color;
         this.addColorToRecent(this.color);
