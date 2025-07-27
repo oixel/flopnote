@@ -1,5 +1,5 @@
 import { Tool } from "$lib/classes/Tool.svelte";
-import type { Color } from "$lib/classes/Color";
+import { Color } from "$lib/classes/Color";
 
 import {
   hexToColor,
@@ -65,12 +65,19 @@ function bucketFill(
 
     // Move downwards as long as the pixel's color is the same as the starting color (in relation to threshold)
     while (
-      y++ < height &&
+      y++ < height - 1 &&
       doColorsMatch(getColor(imageData, coord), startColor, threshold)
     ) {
-      // Fill the current pixel with the fill color, but keep the stroke's opacity
-      const fillColor = hexToColor(color, getColor(imageData, coord).a);
+
+      // Preserve the pixel's opacity, unless the pixel is completely clear (allows for the background to be filled)
+      const currentColor = getColor(imageData, coord);
+      const alpha = (doColorsMatch(currentColor, new Color(0, 0, 0, 0), 0)) ? 255 : currentColor.a;
+
+      // Fill the current pixel with the fill color and correct opacity
+      const fillColor = hexToColor(color, alpha);
       setColor(imageData, coord, fillColor);
+
+      // Mark the pixel as visited 
       visited[getIndex(x, y)] = 1;
 
       // Check left neighboring pixel
