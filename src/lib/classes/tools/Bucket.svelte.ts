@@ -38,7 +38,6 @@ function bucketFill(
   let coord = getPixelCoord(x, y);
 
   const startColor: Color = getColor(imageData, coord);
-  const fillColor: Color = hexToColor(color, 255);
 
   // Loops through all pixels that match the color of the start pixel
   while (pixelStack.length > 0) {
@@ -69,7 +68,8 @@ function bucketFill(
       y++ < height &&
       doColorsMatch(getColor(imageData, coord), startColor, threshold)
     ) {
-      // Fill the current pixel with the fill color!
+      // Fill the current pixel with the fill color, but keep the stroke's opacity
+      const fillColor = hexToColor(color, getColor(imageData, coord).a);
       setColor(imageData, coord, fillColor);
       visited[getIndex(x, y)] = 1;
 
