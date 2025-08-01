@@ -7,10 +7,16 @@
     width,
     height,
     toolHandler,
+    zIndex,
+    selected,
+    isBackground = false,
   }: {
     width: number;
     height: number;
     toolHandler: ToolHandler;
+    zIndex: number;
+    selected: boolean;
+    isBackground?: boolean;
   } = $props();
 
   let canvas: HTMLCanvasElement = $state() as HTMLCanvasElement;
@@ -88,19 +94,21 @@
 />
 
 {#if tool}
-  <!-- Renders tool wherever mouse is hovering on canvas-->
-  <div
-    style={`
+  <!-- Renders tool wherever mouse is hovering on this layer-->
+  {#if selected}
+    <div
+      style={`
         left: ${hoverPos.x}px;
         top: ${hoverPos.y}px; 
         ${tool.size ? `width: ${tool.size}px; height: ${tool.size}px;` : ""}
         background-color: ${tool.color ? toolHandler.color : ""};
         opacity: ${tool.opacity ? `${(tool.opacity * 100) / 255}%` : "100%"};
     `}
-    class="{isHovering
-      ? 'visible'
-      : 'hidden'} {tool.hoverStyle} fixed pointer-events-none"
-  ></div>
+      class="{isHovering
+        ? 'visible'
+        : 'hidden'} {tool.hoverStyle} fixed z-10000 pointer-events-none"
+    ></div>
+  {/if}
 
   <canvas
     {width}
@@ -115,8 +123,12 @@
       // Turn off tool hovering when mouse exits the canvas' bounds
       isHovering = false;
     }}
-    class="rounded-md border-2 {tool?.cursor}"
-    style="background-color: {toolHandler.backgroundColor};"
+    class="rounded-md border-2 {tool?.cursor} absolute z-{zIndex} {selected
+      ? ''
+      : 'pointer-events-none'}"
+    style={isBackground
+      ? `background-color: ${toolHandler.backgroundColor};`
+      : ""}
   >
   </canvas>
 {/if}
