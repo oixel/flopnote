@@ -5,7 +5,7 @@
 </script>
 
 {#if toolHandler.recentColors.length}
-  <div class="w-full h-auto flex border-2">
+  <div class="w-9/10 min-w-38 max-w-48 h-auto flex border-2">
     {#each toolHandler.recentColors as color (color)}
       <button
         aria-label="Recent color used {color}"

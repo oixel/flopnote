@@ -6,7 +6,7 @@
 </script>
 
 <div
-  class="w-9/10 max-w-48 p-2 mx-auto md:mx-2 flex flex-col rounded-md border-2 bg-white"
+  class="w-9/10 min-w-38 max-w-48 p-2 flex flex-col rounded-md border-2 bg-white"
 >
   <input
     type="color"
