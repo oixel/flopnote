@@ -1,5 +1,6 @@
 import { Tool } from "$lib/classes/Tool.svelte";
 import type { CommandHandler } from "$lib/classes/handlers/CommandHandler";
+import { interpolate } from "$lib/scripts/BrushTools";
 
 // Default Paint Brush
 export class PaintBrush extends Tool {
@@ -72,32 +73,20 @@ export class PaintBrush extends Tool {
       // Then draw out the brush stroke
       context.stroke();
     } else {
-      // Draw out the path of the square brush while considering interpolation between points to avoid brush skipping
-      for (let i = 1; i < this.brushStroke.length; i++) {
-        const x0 = this.brushStroke[i - 1].x;
-        const y0 = this.brushStroke[i - 1].y;
-        const x1 = this.brushStroke[i].x;
-        const y1 = this.brushStroke[i].y;
+      // Get interpolated brush stroke to prevent brush skipping
+      const interpolatedPoints = interpolate(this.brushStroke, this.size);
 
-        const distance = Math.hypot(x1 - x0, y1 - y0);
-
-        const steps = Math.ceil(distance / (this.size / 2));
-
-        for (let i = 0; i <= steps; i++) {
-          const interpolation = i / steps;
-          const x = x0 + (x1 - x0) * interpolation;
-          const y = y0 + (y1 - y0) * interpolation;
-
-          context.rect(
-            x - this.size / 2,
-            y - this.size / 2,
-            this.size,
-            this.size
-          );
-        }
+      // Then draw out a square shape at each point of the brush stroke
+      for (const point of interpolatedPoints) {
+        context.rect(
+          point.x - this.size / 2,
+          point.y - this.size / 2,
+          this.size,
+          this.size
+        );
       }
 
-      // Then fill it! (Doing a singular fill preserves the brush's opacity)
+      // Then fill the created shape! (Doing a singular fill preserves the brush's opacity)
       context.fill();
     }
   }

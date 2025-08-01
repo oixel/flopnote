@@ -1,12 +1,13 @@
 import { Tool } from "$lib/classes/Tool.svelte";
 import type { CommandHandler } from "$lib/classes/handlers/CommandHandler";
+import { interpolate } from "$lib/scripts/BrushTools";
 
 // Default Eraser
 export class Eraser extends Tool {
   private prevX: number | null = null;
   private prevY: number | null = null;
 
-  private isCircle: boolean = $state(true);
+  private isCircle: boolean = $state(false);
   private circleHoverStyle: string = "bg-white border-1 rounded-full";
   private squareHoverStyle: string = "bg-white border-1";
 
@@ -38,20 +39,10 @@ export class Eraser extends Tool {
     x1: number,
     y1: number
   ): void {
-    // Use the distance formula to determine the distance between the previous brush stroke point and the current
-    const distance = Math.hypot(x1 - x0, y1 - y0);
-
-    // Determine how many points are needed based on the eraser's current size.
-    const steps = Math.ceil(distance / (this.size / 2));
-
-    // Erase all points from previous brush stroke point to current
-    for (let i = 0; i <= steps; i++) {
-      const interpolation = i / steps;
-      const x = x0 + (x1 - x0) * interpolation;
-      const y = y0 + (y1 - y0) * interpolation;
-
-      // Erase current point
-      this.erase(canvas, x, y);
+    const brushStroke = [{x: x0, y: y0}, {x: x1, y: y1}];
+    const interpolatedPoints = interpolate(brushStroke, this.size);
+    for (const point of interpolatedPoints) {
+      this.erase(canvas, point.x, point.y);
     }
   }
 
