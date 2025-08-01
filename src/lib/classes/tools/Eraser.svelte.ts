@@ -13,17 +13,22 @@ export class Eraser extends Tool {
   // Clear canvas' pixel colors within current shape at given position
   erase(canvas: HTMLCanvasElement, x: number, y: number): void {
     const context = canvas.getContext("2d") as CanvasRenderingContext2D;
+    const size = this.size as number;
 
     // Erases based on currently selected shape
     if (this.isCircle) {
-      context.save();
+      context.save(); // Stores current clipping region to allow returning back to it after erase is handled
       context.beginPath();
-      context.arc(x, y, (this.size as number) / 2, 0, 2 * Math.PI);
-      context.clip();
+
+      const offset = size / 2 - 2; // Ensures that the circle erase lines up with hover icon (-2 due to hover style's border)
+      context.arc(x + offset, y + offset, size / 2, 0, 2 * Math.PI);
+
+      context.clip(); // Prevents canvas manipulation outside of the clipped area
       context.clearRect(0, 0, canvas.width, canvas.height); // Only erases in clipped area
-      context.restore();
+      context.restore(); // Restore back to saved state from before erase (reenables full canvas manipulation)
     } else {
-      context.clearRect(x, y, this.size as number, this.size as number);
+      // Subtract by 2 to center the erase stroke by accounting for hover style's border
+      context.clearRect(x - 2, y - 2, size, size);
     }
   }
 
