@@ -15,16 +15,16 @@ export class PaintBrush extends Tool {
     const context = canvas.getContext("2d") as CanvasRenderingContext2D;
 
     // Apply stroke's current brush attributes before drawing out the stroke (if they are used)
-    if (this.size) context.lineWidth = this.size;
-    if (this.color) context.strokeStyle = this.color;
-    if (this.opacity) context.globalAlpha = this.opacity / 255;
+    context.lineWidth = this.size;
+    context.strokeStyle = this.color;
+    context.globalAlpha = this.opacity / 255;
 
     // Ensure that the brush is round
     context.lineCap = "round";
     context.lineJoin = "round";
 
     // Add initial points of brush stroke and draw out initial point
-    this.brushStroke = [{ x, y }];
+    this.brushStroke = [{ x: x + this.size / 2 - 2, y: y + this.size / 2 - 2 }];
     this.dragUse(canvas, x + 0.0001, y + 0.0001);
   }
 
@@ -32,7 +32,10 @@ export class PaintBrush extends Tool {
   // Do it this way rather than just drawing every move allows for brush strokes of different opacities
   dragUse(canvas: HTMLCanvasElement, x: number, y: number): void {
     // Append new brush stroke points
-    this.brushStroke.push({ x, y });
+    this.brushStroke.push({
+      x: x + this.size / 2 - 2,
+      y: y + this.size / 2 - 2,
+    });
 
     // Grab canvas' current context
     const context = canvas.getContext("2d") as CanvasRenderingContext2D;
