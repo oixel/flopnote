@@ -30,6 +30,11 @@ export class ToolHandler {
     if (tool.color) tool.color = this.color;
   }
 
+  // Toggles the currently selected tool's shape (if it has alternate shapes)
+  toggleToolShape(): void {
+    this.tool?.toggleShape();
+  }
+
   // Append any NEW, used color to the array of recent colors
   addColorToRecent(color: string): void {
     // Avoid updating array if the color has not changed

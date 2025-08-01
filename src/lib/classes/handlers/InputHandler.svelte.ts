@@ -46,6 +46,10 @@ export class InputHandler {
         case "i":
           this.toolHandler.setTool(this.toolHandler.eyeDropper);
           break;
+        // Allows for brushes / eraser to be toggled from circular to square shape
+        case "t":
+          this.toolHandler.toggleToolShape();
+          break;
         // Increases current tool size with up arrow
         case "arrowup":
           this.toolHandler.tool?.alterSize(1);

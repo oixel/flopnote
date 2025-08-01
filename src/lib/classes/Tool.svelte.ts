@@ -16,7 +16,7 @@ export class Tool {
   opacity: number | null = $state(null); // Optional: some tools don't need opacity (e.g. Eye Dropper)
 
   cursor: string = "cursor-none"; // Sets the mouse cursor's icon while hovering over canvas
-  hoverStyle: string; // Appearance of tool while hovering over canvas
+  hoverStyle: string = $state(""); // Appearance of tool while hovering over canvas
 
   previousImageData?: ImageData;
 
@@ -29,6 +29,11 @@ export class Tool {
       if (this.size < 1) this.size = 1;
       else if (this.size > this.maxSize) this.size = this.maxSize;
     }
+  }
+
+  // Allows tools such as the paint brush and eraser to toggle between circular and square shapes
+  toggleShape(): void {
+    return;
   }
 
   // Called when mouse is first clicked inside of the canvas
