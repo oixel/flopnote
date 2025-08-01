@@ -98,7 +98,7 @@
           width={canvasWidth}
           height={canvasHeight}
           {toolHandler}
-          zIndex={2}
+          zIndex={3}
           selected={selectedLayer == 3}
         />
       </div>

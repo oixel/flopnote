@@ -103,10 +103,11 @@
         ${tool.size ? `width: ${tool.size}px; height: ${tool.size}px;` : ""}
         background-color: ${tool.color ? toolHandler.color : ""};
         opacity: ${tool.opacity ? `${(tool.opacity * 100) / 255}%` : "100%"};
+        z-index: ${zIndex + 1};
     `}
       class="{isHovering
         ? 'visible'
-        : 'hidden'} {tool.hoverStyle} fixed z-10000 pointer-events-none"
+        : 'hidden'} {tool.hoverStyle} fixed pointer-events-none"
     ></div>
   {/if}
 
@@ -123,12 +124,14 @@
       // Turn off tool hovering when mouse exits the canvas' bounds
       isHovering = false;
     }}
-    class="rounded-md border-2 {tool?.cursor} absolute z-{zIndex} {selected
+    class="rounded-md border-2 {tool?.cursor} absolute {selected
       ? ''
       : 'pointer-events-none'}"
-    style={isBackground
+    style="{isBackground
       ? `background-color: ${toolHandler.backgroundColor};`
-      : ""}
+      : ''}
+      z-index: {zIndex};
+      "
   >
   </canvas>
 {/if}
