@@ -14,7 +14,7 @@
   } = $props();
 
   let canvas: HTMLCanvasElement = $state() as HTMLCanvasElement;
- 
+
   // Grab the current tool from the ToolHandler to apply hover style and access custom values
   let tool = $derived(toolHandler.tool);
 
@@ -65,26 +65,10 @@
     if (isMouseDown) {
       isMouseDown = false;
 
-      // Call tool's end functionality when mouse is released 
+      // Call tool's end functionality when mouse is released
       toolHandler.endUse(canvas, event.x - offsetX, event.y - offsetY);
     }
   }
-
-  //
-  // DELETE THIS
-  //
-  // Provides tool hovering support for wherever the mouse is located
-  function handleMouseHover(event: MouseEvent) {
-    // Apply an offset if brush is being used instead of eraser (due to how brush draws)
-    let brushOffset =
-      tool?.name == "Paint Brush" && tool.size
-        ? (tool?.size / 2) * Number(tool?.name == "Paint Brush")
-        : 0;
-    hoverPos = { x: event.x - brushOffset, y: event.y - brushOffset };
-  }
-  //
-  //
-  //
 </script>
 
 <!-- Update offset whenever the window's size is changed -->
@@ -97,7 +81,11 @@
 />
 
 <!-- Track mouse position to place tool hover where mouse is -->
-<svelte:document onmousemove={handleMouseHover} />
+<svelte:document
+  onmousemove={(event: MouseEvent) => {
+    hoverPos = { x: event.x, y: event.y };
+  }}
+/>
 
 {#if tool}
   <!-- Renders tool wherever mouse is hovering on canvas-->
@@ -105,8 +93,7 @@
     style={`
         left: ${hoverPos.x}px;
         top: ${hoverPos.y}px; 
-        width: ${tool.size}px; 
-        height: ${tool.size}px;
+        ${tool.size ? `width: ${tool.size}px; height: ${tool.size}px;` : ""}
         background-color: ${tool.color ? toolHandler.color : ""};
         opacity: ${tool.opacity ? `${(tool.opacity * 100) / 255}%` : "100%"};
     `}

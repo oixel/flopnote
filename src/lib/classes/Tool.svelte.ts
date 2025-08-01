@@ -9,11 +9,11 @@ export class Tool {
 
   commandHandler?: CommandHandler;
 
-  size: number | null = $state(null); // Optional: some tools don't need a size (e.g. Bucket)
+  size: number = $state(0); // Optional: some tools don't need a size (e.g. Bucket)
   maxSize: number = 100;
 
-  color: string | null = $state(null); // Optional: some tools don't need colors (e.g. Eraser)
-  opacity: number | null = $state(null); // Optional: some tools don't need opacity (e.g. Eye Dropper)
+  color: string = $state(""); // Optional: some tools don't need colors (e.g. Eraser)
+  opacity: number = $state(0); // Optional: some tools don't need opacity (e.g. Eye Dropper)
 
   cursor: string = "cursor-none"; // Sets the mouse cursor's icon while hovering over canvas
   hoverStyle: string = $state(""); // Appearance of tool while hovering over canvas
@@ -74,9 +74,9 @@ export class Tool {
   constructor(
     name: string,
     commandHandler?: CommandHandler,
-    size: number | null = null,
-    color: string | null = null,
-    opacity: number | null = null,
+    size: number = 0,
+    color: string = "",
+    opacity: number = 0,
     hoverStyle: string = ""
   ) {
     this.name = name;

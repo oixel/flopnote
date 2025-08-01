@@ -13,22 +13,21 @@ export class Eraser extends Tool {
   // Clear canvas' pixel colors within current shape at given position
   erase(canvas: HTMLCanvasElement, x: number, y: number): void {
     const context = canvas.getContext("2d") as CanvasRenderingContext2D;
-    const size = this.size as number;
 
     // Erases based on currently selected shape
     if (this.isCircle) {
       context.save(); // Stores current clipping region to allow returning back to it after erase is handled
       context.beginPath();
 
-      const offset = size / 2 - 2; // Ensures that the circle erase lines up with hover icon (-2 due to hover style's border)
-      context.arc(x + offset, y + offset, size / 2, 0, 2 * Math.PI);
+      const offset = this.size / 2 - 2; // Ensures that the circle erase lines up with hover icon
+      context.arc(x + offset, y + offset, this.size / 2, 0, 2 * Math.PI);
 
       context.clip(); // Prevents canvas manipulation outside of the clipped area
       context.clearRect(0, 0, canvas.width, canvas.height); // Only erases in clipped area
       context.restore(); // Restore back to saved state from before erase (reenables full canvas manipulation)
     } else {
-      // Subtract by 2 to center the erase stroke by accounting for hover style's border
-      context.clearRect(x - 2, y - 2, size, size);
+      // Subtract by 2 to center the erase stroke
+      context.clearRect(x - 2, y - 2, this.size, this.size);
     }
   }
 
@@ -43,7 +42,7 @@ export class Eraser extends Tool {
     const distance = Math.hypot(x1 - x0, y1 - y0);
 
     // Determine how many points are needed based on the eraser's current size.
-    const steps = Math.ceil(distance / ((this.size as number) / 2));
+    const steps = Math.ceil(distance / (this.size / 2));
 
     // Erase all points from previous brush stroke point to current
     for (let i = 0; i <= steps; i++) {
@@ -77,6 +76,7 @@ export class Eraser extends Tool {
 
   // Erase under mouse as it gets moved
   dragUse(canvas: HTMLCanvasElement, x: number, y: number): void {
+    // If a stroke, erase stroke, otherwise erase current, singular point
     if (this.prevX !== null && this.prevY !== null) {
       this.eraseStroke(canvas, this.prevX, this.prevY, x, y);
     } else this.erase(canvas, x, y);
