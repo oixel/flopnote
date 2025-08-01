@@ -50,7 +50,7 @@ export class Eraser extends Tool {
       const x = x0 + (x1 - x0) * interpolation;
       const y = y0 + (y1 - y0) * interpolation;
 
-      // Call eraser subclass' specific erase functionality
+      // Erase current point
       this.erase(canvas, x, y);
     }
   }
@@ -76,7 +76,7 @@ export class Eraser extends Tool {
 
   // Erase under mouse as it gets moved
   dragUse(canvas: HTMLCanvasElement, x: number, y: number): void {
-    // If a stroke, erase stroke, otherwise erase current, singular point
+    // If a stroke, erase the stroke, otherwise erase current, singular point
     if (this.prevX !== null && this.prevY !== null) {
       this.eraseStroke(canvas, this.prevX, this.prevY, x, y);
     } else this.erase(canvas, x, y);
