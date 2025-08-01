@@ -39,8 +39,16 @@ export class Eraser extends Tool {
     x1: number,
     y1: number
   ): void {
-    const brushStroke = [{x: x0, y: y0}, {x: x1, y: y1}];
-    const interpolatedPoints = interpolate(brushStroke, this.size);
+    // Get interpolated points from previous brush stroke's point to current (prevents brush skipping)
+    const interpolatedPoints = interpolate(
+      [
+        { x: x0, y: y0 },
+        { x: x1, y: y1 },
+      ],
+      this.size
+    );
+
+    // Erase through interpolated brush stroke
     for (const point of interpolatedPoints) {
       this.erase(canvas, point.x, point.y);
     }
