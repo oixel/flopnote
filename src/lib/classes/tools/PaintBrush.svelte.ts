@@ -25,18 +25,17 @@ export class PaintBrush extends Tool {
 
     const context = canvas.getContext("2d") as CanvasRenderingContext2D;
 
-    // Apply stroke's current brush attributes before drawing out the stroke (if they are used)
-    context.lineWidth = this.size;
-    context.strokeStyle = this.color;
+    // Update brush's update
     context.globalAlpha = this.opacity / 255;
 
-    // Applies brush's shape when
-    if (this.isCircle) {
-      context.lineCap = "round";
-      context.lineJoin = "round";
-    } else {
-      context.lineCap = "square";
-    }
+    // Update current brush's attributes for circular brush
+    context.lineWidth = this.size;
+    context.strokeStyle = this.color;
+    context.lineCap = "round";
+    context.lineJoin = "round";
+
+    // Ensure square brush fills the current color
+    context.fillStyle = this.color;
 
     // Add initial points of brush stroke and draw out initial point
     this.brushStroke = [{ x: x + this.size / 2 - 2, y: y + this.size / 2 - 2 }];
@@ -49,44 +48,57 @@ export class PaintBrush extends Tool {
     // Grab canvas' current context
     const context = canvas.getContext("2d") as CanvasRenderingContext2D;
 
+    // Append new brush stroke points
+    this.brushStroke.push({
+      x: x + this.size / 2 - 2,
+      y: y + this.size / 2 - 2,
+    });
+
+    // Redraw canvas' previous content back onto it
+    if (this.previousImageData)
+      context.putImageData(this.previousImageData, 0, 0);
+
+    // Start drawing the brush stroke's path
+    context.beginPath();
+
+    // Circular brush simply draws lines from each point of brush stroke while square brush creates a rect shape before filling it out
     if (this.isCircle) {
-      // Append new brush stroke points
-      this.brushStroke.push({
-        x: x + this.size / 2 - 2,
-        y: y + this.size / 2 - 2,
-      });
-
-      // Redraw canvas' previous content back onto it
-      if (this.previousImageData)
-        context.putImageData(this.previousImageData, 0, 0);
-
       // Draw out the current brush stroke's line data on top of previous content
-      context.beginPath();
       for (let i = 1; i < this.brushStroke.length; i++) {
         context.moveTo(this.brushStroke[i - 1].x, this.brushStroke[i - 1].y);
         context.lineTo(this.brushStroke[i].x, this.brushStroke[i].y);
       }
 
-      // Fill brush stroke's path!
+      // Then draw out the brush stroke
       context.stroke();
     } else {
-      const context = canvas.getContext("2d") as CanvasRenderingContext2D;
+      // Draw out the path of the square brush while considering interpolation between points to avoid brush skipping
+      for (let i = 1; i < this.brushStroke.length; i++) {
+        const x0 = this.brushStroke[i - 1].x;
+        const y0 = this.brushStroke[i - 1].y;
+        const x1 = this.brushStroke[i].x;
+        const y1 = this.brushStroke[i].y;
 
-    // Erases based on currently selected shape
-    if (this.isCircle) {
-      context.save(); // Stores current clipping region to allow returning back to it after erase is handled
-      context.beginPath();
+        const distance = Math.hypot(x1 - x0, y1 - y0);
 
-      const offset = this.size / 2 - 2; // Ensures that the circle erase lines up with hover icon
-      context.arc(x + offset, y + offset, this.size / 2, 0, 2 * Math.PI);
+        const steps = Math.ceil(distance / (this.size / 2));
 
-      context.clip(); // Prevents canvas manipulation outside of the clipped area
-      context.clearRect(0, 0, canvas.width, canvas.height); // Only erases in clipped area
-      context.restore(); // Restore back to saved state from before erase (reenables full canvas manipulation)
-    } else {
-      // Subtract by 2 to center the erase stroke
-      context.clearRect(x - 2, y - 2, this.size, this.size);
-    }
+        for (let i = 0; i <= steps; i++) {
+          const interpolation = i / steps;
+          const x = x0 + (x1 - x0) * interpolation;
+          const y = y0 + (y1 - y0) * interpolation;
+
+          context.rect(
+            x - this.size / 2,
+            y - this.size / 2,
+            this.size,
+            this.size
+          );
+        }
+      }
+
+      // Then fill it! (Doing a singular fill preserves the brush's opacity)
+      context.fill();
     }
   }
 
