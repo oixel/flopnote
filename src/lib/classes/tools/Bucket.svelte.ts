@@ -139,6 +139,6 @@ export class Bucket extends Tool {
     super("Bucket", commandHandler);
     this.color = color;
     this.threshold = threshold;
-    this.hoverStyle = "w-5 h-5";
+    this.hoverStyle = "w-2 h-2 border-1";
   }
 }
