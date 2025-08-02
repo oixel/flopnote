@@ -124,7 +124,7 @@
       // Turn off tool hovering when mouse exits the canvas' bounds
       isHovering = false;
     }}
-    class="rounded-md border-2 {tool?.cursor} absolute {selected
+    class="absolute inset-0 rounded-md border-2 {tool?.cursor}  {selected
       ? ''
       : 'pointer-events-none'}"
     style="{isBackground

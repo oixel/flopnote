@@ -20,8 +20,13 @@
   // Instantiate an InputHandler to allow for keyboard shortcuts
   const inputHandler = new InputHandler(commandHandler, toolHandler);
 
+  // Stores the ImageData of each layer and renders n layers, where n = quantity of ImageData
+  const layers: Array<ImageData> = [
+    new ImageData(canvasWidth, canvasHeight),
+    new ImageData(canvasWidth, canvasHeight),
+    new ImageData(canvasWidth, canvasHeight),
+  ];
   let selectedLayer = $state(1);
-  const maxLayerCount = 3;
 </script>
 
 <svelte:window
@@ -54,24 +59,28 @@
           <div class="flex flex-col gap-1">
             <button
               onclick={() => {
-                if (selectedLayer < maxLayerCount) selectedLayer++;
+                if (selectedLayer < layers.length) selectedLayer++;
               }}
               class="ml-2 cursor-pointer bg-black text-white h-4 flex items-center justify-center py-3 pb-4 px-1.5 rounded-md"
-              >+</button
+              >↑</button
             >
             <button
               onclick={() => {
                 if (selectedLayer > 1) selectedLayer--;
               }}
               class="ml-2 cursor-pointer bg-black text-white h-4 flex items-center justify-center py-3 pb-4 px-1.5 rounded-md"
-              >-</button
+              >↓</button
             >
           </div>
         </div>
       </div>
 
       <!-- The canvas which the user draws on -->
-      <div class="relative min-w-[{canvasWidth}px] min-h-[{canvasHeight}px]">
+      <div
+        style="min-width: {canvasWidth}px; min-height: {canvasHeight}px;"
+        class="relative bg-red-200"
+      >
+        <!-- Initialize background layer that cannot be colored on, but contains the set background color -->
         <Layer
           width={canvasWidth}
           height={canvasHeight}
@@ -80,27 +89,17 @@
           selected={false}
           isBackground={true}
         />
-        <Layer
-          width={canvasWidth}
-          height={canvasHeight}
-          {toolHandler}
-          zIndex={1}
-          selected={selectedLayer == 1}
-        />
-        <Layer
-          width={canvasWidth}
-          height={canvasHeight}
-          {toolHandler}
-          zIndex={2}
-          selected={selectedLayer == 2}
-        />
-        <Layer
-          width={canvasWidth}
-          height={canvasHeight}
-          {toolHandler}
-          zIndex={3}
-          selected={selectedLayer == 3}
-        />
+
+        <!-- Renders out all layers with stored ImageData -->
+        {#each layers as imageData, index}
+          <Layer
+            width={canvasWidth}
+            height={canvasHeight}
+            {toolHandler}
+            zIndex={index + 1}
+            selected={index + 1 == selectedLayer}
+          />
+        {/each}
       </div>
 
       <!-- Tools to the right side of the canvas -->
