@@ -49,23 +49,33 @@
     }
 
     //
-    function swapLayerDown(): void {}
+    function deleteLayer(): void {
+        layers.splice(activeLayerIndex, 1);
+    }
 </script>
 
 {#if activeLayerIndex == index}
-    <div class="flex justify-center gap-2">
+    <div class="flex justify-center gap-1">
         {#if index != layers.length - 1}
             <button
                 onclick={() => swapLayer(1)}
-                class="cursor-pointer bg-white rounded-md border-1 w-6.5"
+                class="cursor-pointer bg-white rounded-md border-1 min-w-4"
                 >↑</button
+            >
+        {/if}
+
+        {#if layers.length > 1}
+            <button
+                onclick={deleteLayer}
+                class="w-full cursor-pointer bg-red-400 text-white border-black rounded-md border-2 font-bold"
+                >X</button
             >
         {/if}
 
         {#if index != 0}
             <button
                 onclick={() => swapLayer(-1)}
-                class="cursor-pointer bg-white rounded-md border-1 w-6.5"
+                class="cursor-pointer bg-white rounded-md border-1 min-w-4"
                 >↓</button
             >
         {/if}
