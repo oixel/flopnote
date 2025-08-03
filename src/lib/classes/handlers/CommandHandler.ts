@@ -1,4 +1,4 @@
-import { Command } from "$lib/classes/Command";
+import { Command } from "$lib/classes/commands/Command";
 
 export class CommandHandler {
   pointer: number = 0;

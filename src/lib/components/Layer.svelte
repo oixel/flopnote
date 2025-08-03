@@ -7,14 +7,16 @@
     width,
     height,
     toolHandler,
-    zIndex,
+    layers = $bindable(),
+    index,
     selected,
     isBackground = false,
   }: {
     width: number;
     height: number;
     toolHandler: ToolHandler;
-    zIndex: number;
+    layers: Array<ImageData>;
+    index: number;
     selected: boolean;
     isBackground?: boolean;
   } = $props();
@@ -35,6 +37,16 @@
 
   onMount(() => {
     setOffset();
+  });
+
+  //
+  $effect(() => {
+    if (layers) {
+      const context = canvas.getContext("2d");
+      if (layers[index] instanceof ImageData) {
+        context?.putImageData(layers[index], 0, 0);
+      }
+    }
   });
 
   // Ensures that mouse pointer is correctly offset to within the Canvas element
@@ -73,6 +85,9 @@
 
       // Call tool's end functionality when mouse is released
       toolHandler.endUse(canvas, event.x - offsetX, event.y - offsetY);
+      layers[index] = canvas
+        .getContext("2d")
+        ?.getImageData(0, 0, width, height) as ImageData;
     }
   }
 </script>
@@ -103,7 +118,7 @@
         ${tool.size ? `width: ${tool.size}px; height: ${tool.size}px;` : ""}
         background-color: ${tool.color ? toolHandler.color : ""};
         opacity: ${tool.opacity ? `${(tool.opacity * 100) / 255}%` : "100%"};
-        z-index: ${zIndex + 1};
+        z-index: ${index + 2};
     `}
       class="{isHovering
         ? 'visible'
@@ -130,7 +145,7 @@
     style="{isBackground
       ? `background-color: ${toolHandler.backgroundColor};`
       : ''}
-      z-index: {zIndex};
+      z-index: {index + 1};
       "
   >
   </canvas>

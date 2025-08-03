@@ -1,5 +1,7 @@
 <script lang="ts">
+  import LayerHandler from "$lib/classes/handlers/LayerHandler.svelte";
   import Layer from "$lib/components/Layer.svelte";
+  import LayerPreview from "$lib/components/LayerPreview.svelte";
   import { ToolHandler } from "$lib/classes/handlers/ToolHandler.svelte";
   import ToolSettings from "$lib/components/ToolSettings.svelte";
   import { CommandHandler } from "$lib/classes/handlers/CommandHandler";
@@ -20,13 +22,8 @@
   // Instantiate an InputHandler to allow for keyboard shortcuts
   const inputHandler = new InputHandler(commandHandler, toolHandler);
 
-  // Stores the ImageData of each layer and renders n layers, where n = quantity of ImageData
-  const layers: Array<ImageData> = [
-    new ImageData(canvasWidth, canvasHeight),
-    new ImageData(canvasWidth, canvasHeight),
-    new ImageData(canvasWidth, canvasHeight),
-  ];
-  let selectedLayer = $state(1);
+  //
+  const layerHandler = new LayerHandler(canvasWidth, canvasHeight);
 </script>
 
 <svelte:window
@@ -49,29 +46,21 @@
       <div
         class="grow w-full mx-3 flex flex-col h-full justify-center items-end gap-2"
       >
-        <h2 class="mr-3.5 font-bold">Layer:</h2>
+        <h2 class="mr-2 font-bold">[ Layers ]</h2>
         <!-- Layer Controls -->
         <div
-          class="w-20 h-20 pl-2 bg-white border-2 rounded-md flex items-center justify-evenly text-2xl font-bold"
+          style="width: {canvasWidth / 8 + 4}px;"
+          class="flex flex-col-reverse max-h-120 overflow-auto gap-1 mr-2.25"
         >
-          {selectedLayer}
-
-          <div class="flex flex-col gap-1">
-            <button
-              onclick={() => {
-                if (selectedLayer < layers.length) selectedLayer++;
-              }}
-              class="ml-2 cursor-pointer bg-black text-white h-4 flex items-center justify-center py-3 pb-4 px-1.5 rounded-md"
-              >↑</button
-            >
-            <button
-              onclick={() => {
-                if (selectedLayer > 1) selectedLayer--;
-              }}
-              class="ml-2 cursor-pointer bg-black text-white h-4 flex items-center justify-center py-3 pb-4 px-1.5 rounded-md"
-              >↓</button
-            >
-          </div>
+          {#each layerHandler.layers as _, index}
+            <LayerPreview
+              width={canvasWidth}
+              height={canvasHeight}
+              layers={layerHandler.layers}
+              {index}
+              bind:activeLayerIndex={layerHandler.activeLayerIndex}
+            />
+          {/each}
         </div>
       </div>
 
@@ -85,19 +74,21 @@
           width={canvasWidth}
           height={canvasHeight}
           {toolHandler}
-          zIndex={0}
+          layers={layerHandler.layers}
+          index={-1}
           selected={false}
           isBackground={true}
         />
 
         <!-- Renders out all layers with stored ImageData -->
-        {#each layers as imageData, index}
+        {#each layerHandler.layers as _, index}
           <Layer
             width={canvasWidth}
             height={canvasHeight}
             {toolHandler}
-            zIndex={index + 1}
-            selected={index + 1 == selectedLayer}
+            bind:layers={layerHandler.layers}
+            {index}
+            selected={index == layerHandler.activeLayerIndex}
           />
         {/each}
       </div>

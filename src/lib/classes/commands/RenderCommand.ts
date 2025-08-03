@@ -1,4 +1,4 @@
-import { Command } from "$lib/classes/Command";
+import { Command } from "$lib/classes/commands/Command";
 
 // Handles rendering image data to screen
 export class RenderCommand extends Command {
