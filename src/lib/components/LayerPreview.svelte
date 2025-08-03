@@ -1,4 +1,6 @@
 <script lang="ts">
+    import Layer from "./Layer.svelte";
+
     let {
         width,
         height,
@@ -36,13 +38,38 @@
             context.drawImage(tempCanvas, 0, 0);
         }
     });
+
+    //
+    function swapLayer(direction: -1 | 1): void {
+        const temp: ImageData = layers[index + direction];
+        layers[index + direction] = layers[index];
+        layers[index] = temp;
+
+        activeLayerIndex = index + direction;
+    }
+
+    //
+    function swapLayerDown(): void {}
 </script>
 
 {#if activeLayerIndex == index}
-    <button
-        class="cursor-pointer bg-white rounded-md border-1 w-fit self-center px-1.5 font-bold"
-        >O</button
-    >
+    <div class="flex justify-center gap-2">
+        {#if index != layers.length - 1}
+            <button
+                onclick={() => swapLayer(1)}
+                class="cursor-pointer bg-white rounded-md border-1 w-6.5"
+                >↑</button
+            >
+        {/if}
+
+        {#if index != 0}
+            <button
+                onclick={() => swapLayer(-1)}
+                class="cursor-pointer bg-white rounded-md border-1 w-6.5"
+                >↓</button
+            >
+        {/if}
+    </div>
 {/if}
 <canvas
     {width}
