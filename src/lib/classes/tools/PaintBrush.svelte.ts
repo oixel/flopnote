@@ -1,6 +1,7 @@
 import { Tool } from "$lib/classes/Tool.svelte";
 import type { CommandHandler } from "$lib/classes/handlers/CommandHandler";
 import { interpolate } from "$lib/scripts/BrushTools";
+import type LayerHandler from "../handlers/LayerHandler.svelte";
 
 // Default Paint Brush
 export class PaintBrush extends Tool {
@@ -21,7 +22,7 @@ export class PaintBrush extends Tool {
   }
 
   // Grab current image data and apply initial points of brush stroke
-  startUse(canvas: HTMLCanvasElement, x: number, y: number): void {
+  startUse(layerHandler: LayerHandler, canvas: HTMLCanvasElement, x: number, y: number): void {
     this.storePreviousImageData(canvas);
 
     const context = canvas.getContext("2d") as CanvasRenderingContext2D;
@@ -40,12 +41,12 @@ export class PaintBrush extends Tool {
 
     // Add initial points of brush stroke and draw out initial point
     this.brushStroke = [{ x: x + this.size / 2 - 2, y: y + this.size / 2 - 2 }];
-    this.dragUse(canvas, x + 0.0001, y + 0.0001);
+    this.dragUse(layerHandler, canvas, x + 0.0001, y + 0.0001);
   }
 
   // Draws out canvas content from before the brush stroke and then draws out current brush stroke on top
   // Do it this way rather than just drawing every move allows for brush strokes of different opacities
-  dragUse(canvas: HTMLCanvasElement, x: number, y: number): void {
+  dragUse(layerHandler: LayerHandler, canvas: HTMLCanvasElement, x: number, y: number): void {
     // Grab canvas' current context
     const context = canvas.getContext("2d") as CanvasRenderingContext2D;
 
@@ -92,8 +93,8 @@ export class PaintBrush extends Tool {
   }
 
   // Store canvas' new state in command time line for redo()
-  endUse(canvas: HTMLCanvasElement): void {
-    this.storeCommand(canvas);
+  endUse(layerHandler: LayerHandler, canvas: HTMLCanvasElement): void {
+    this.storeCommand(layerHandler, canvas);
   }
 
   constructor(

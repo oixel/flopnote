@@ -74,7 +74,7 @@
           width={canvasWidth}
           height={canvasHeight}
           {toolHandler}
-          layers={layerHandler.layers}
+          {layerHandler}
           index={-1}
           selected={false}
           isBackground={true}
@@ -86,7 +86,7 @@
             width={canvasWidth}
             height={canvasHeight}
             {toolHandler}
-            bind:layers={layerHandler.layers}
+            {layerHandler}
             {index}
             selected={index == layerHandler.activeLayerIndex}
           />

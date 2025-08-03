@@ -2,6 +2,7 @@
 
 import { RenderCommand } from "./commands/RenderCommand";
 import type { CommandHandler } from "./handlers/CommandHandler";
+import type LayerHandler from "./handlers/LayerHandler.svelte";
 
 // Base class for all tools
 export class Tool {
@@ -37,17 +38,17 @@ export class Tool {
   }
 
   // Called when mouse is first clicked inside of the canvas
-  startUse(_canvas: HTMLCanvasElement, _x: number, _y: number): void {
+  startUse(_layerHandler: LayerHandler, _canvas: HTMLCanvasElement, _x: number, _y: number): void {
     return;
   }
 
   // Called when the mouse is clicked and moving around the canvas
-  dragUse(_canvas: HTMLCanvasElement, _x: number, _y: number): void {
+  dragUse(_layerHandler: LayerHandler, _canvas: HTMLCanvasElement, _x: number, _y: number): void {
     return;
   }
 
   // Called when mouse is released
-  endUse(_canvas: HTMLCanvasElement, _x: number, _y: number): void {
+  endUse(_layerHandler: LayerHandler, _canvas: HTMLCanvasElement, _x: number, _y: number): void {
     return;
   }
 
@@ -64,9 +65,9 @@ export class Tool {
   }
 
   // Append canvas changes to the command timeline
-  storeCommand(canvas: HTMLCanvasElement): void {
+  storeCommand(layerHandler: LayerHandler, canvas: HTMLCanvasElement): void {
     if (this.previousImageData && this.commandHandler) {
-      const command = new RenderCommand(canvas, this.previousImageData);
+      const command = new RenderCommand(layerHandler, canvas, this.previousImageData);
       this.commandHandler.addCommand(command);
     }
   }

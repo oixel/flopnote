@@ -9,6 +9,7 @@ import {
 } from "$lib/scripts/ColorTools";
 
 import type { CommandHandler } from "$lib/classes/handlers/CommandHandler";
+import type LayerHandler from "../handlers/LayerHandler.svelte";
 
 // A combined iterative / recursive flood fill algorithm based on https://www.williammalone.com/articles/html5-canvas-javascript-paint-bucket-tool/
 function bucketFill(
@@ -125,10 +126,10 @@ export class Bucket extends Tool {
   threshold: number = $state(0);
 
   // Flood fill all pixels with matching color (in relation to threshold) and store command
-  startUse(canvas: HTMLCanvasElement, x: number, y: number): void {
+  startUse(layerHandler: LayerHandler, canvas: HTMLCanvasElement, x: number, y: number): void {
     this.storePreviousImageData(canvas);
     bucketFill(canvas, x, y, this.color as string, this.threshold);
-    this.storeCommand(canvas);
+    this.storeCommand(layerHandler, canvas);
   }
 
   constructor(

@@ -4,6 +4,7 @@ import { Eraser } from "$lib/classes/tools/Eraser.svelte";
 import { EyeDropper } from "$lib/classes/tools/EyeDropper.svelte";
 import { PaintBrush } from "$lib/classes/tools/PaintBrush.svelte";
 import { CommandHandler } from "$lib/classes/handlers/CommandHandler";
+import type LayerHandler from "./LayerHandler.svelte";
 
 export class ToolHandler {
   // Tracks the currently selected tool
@@ -49,7 +50,7 @@ export class ToolHandler {
   }
 
   // Applies universal color to tools that need it, and serves as a controller for current tool's startUse()
-  startUse(canvas: HTMLCanvasElement, x: number, y: number): void {
+  startUse(layerHandler: LayerHandler, canvas: HTMLCanvasElement, x: number, y: number): void {
     if (this.tool) {
       // Apply current universal color to tool (if it uses colors) and attempt to append the used color to array of recent
       if (this.tool.color) {
@@ -58,7 +59,7 @@ export class ToolHandler {
       }
 
       // Call the tool's start functionality
-      const output = this.tool.startUse(canvas, x, y);
+      const output = this.tool.startUse(layerHandler, canvas, x, y);
 
       // Allows eye dropper tool to work
       if (typeof output === "string") this.color = output;
@@ -66,13 +67,13 @@ export class ToolHandler {
   }
 
   // Serves as a controller for current tool's dragUse()
-  dragUse(canvas: HTMLCanvasElement, x: number, y: number): void {
-    this.tool?.dragUse(canvas, x, y);
+  dragUse(layerHandler: LayerHandler, canvas: HTMLCanvasElement, x: number, y: number): void {
+    this.tool?.dragUse(layerHandler, canvas, x, y);
   }
 
   // Serves as a controller for current tool's endUse()
-  endUse(canvas: HTMLCanvasElement, x: number, y: number): void {
-    this.tool?.endUse(canvas, x, y);
+  endUse(layerHandler: LayerHandler, canvas: HTMLCanvasElement, x: number, y: number): void {
+    this.tool?.endUse(layerHandler, canvas, x, y);
   }
 
   constructor(commandHandler: CommandHandler) {

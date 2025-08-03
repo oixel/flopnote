@@ -1,6 +1,7 @@
 import { Tool } from "$lib/classes/Tool.svelte";
 import type { CommandHandler } from "$lib/classes/handlers/CommandHandler";
 import { interpolate } from "$lib/scripts/BrushTools";
+import type LayerHandler from "../handlers/LayerHandler.svelte";
 
 // Default Eraser
 export class Eraser extends Tool {
@@ -65,16 +66,16 @@ export class Eraser extends Tool {
   }
 
   // Called whenever the mouse is first clicked on canvas
-  startUse(canvas: HTMLCanvasElement, x: number, y: number): void {
+  startUse(layerHandler: LayerHandler, canvas: HTMLCanvasElement, x: number, y: number): void {
     // Store initial canvas image data to allow for undo functionality
     this.storePreviousImageData(canvas);
 
     // Erase initial clicked position
-    this.dragUse(canvas, x, y);
+    this.dragUse(layerHandler, canvas, x, y);
   }
 
   // Erase under mouse as it gets moved
-  dragUse(canvas: HTMLCanvasElement, x: number, y: number): void {
+  dragUse(_layerHandler: LayerHandler, canvas: HTMLCanvasElement, x: number, y: number): void {
     // If a stroke, erase the stroke, otherwise erase current, singular point
     if (this.prevX !== null && this.prevY !== null) {
       this.eraseStroke(canvas, this.prevX, this.prevY, x, y);
@@ -85,9 +86,9 @@ export class Eraser extends Tool {
   }
 
   // Erase final points when mouse is released and store erase command
-  endUse(canvas: HTMLCanvasElement, x: number, y: number): void {
-    this.dragUse(canvas, x, y);
-    this.storeCommand(canvas);
+  endUse(layerHandler: LayerHandler, canvas: HTMLCanvasElement, x: number, y: number): void {
+    this.dragUse(layerHandler, canvas, x, y);
+    this.storeCommand(layerHandler, canvas);
     this.prevX = null;
     this.prevY = null;
   }

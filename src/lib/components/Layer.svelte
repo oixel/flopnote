@@ -2,12 +2,13 @@
   import { onMount } from "svelte";
 
   import { ToolHandler } from "$lib/classes/handlers/ToolHandler.svelte";
+  import type LayerHandler from "$lib/classes/handlers/LayerHandler.svelte";
 
   let {
     width,
     height,
     toolHandler,
-    layers = $bindable(),
+    layerHandler,
     index,
     selected,
     isBackground = false,
@@ -15,7 +16,7 @@
     width: number;
     height: number;
     toolHandler: ToolHandler;
-    layers: Array<ImageData>;
+    layerHandler: LayerHandler;
     index: number;
     selected: boolean;
     isBackground?: boolean;
@@ -41,10 +42,10 @@
 
   //
   $effect(() => {
-    if (layers) {
+    if (layerHandler.layers) {
       const context = canvas.getContext("2d");
-      if (layers[index] instanceof ImageData) {
-        context?.putImageData(layers[index], 0, 0);
+      if (layerHandler.layers[index] instanceof ImageData) {
+        context?.putImageData(layerHandler.layers[index], 0, 0);
       }
     }
   });
@@ -63,7 +64,12 @@
     isMouseDown = true;
 
     // Call tool's start functionality on initial mouse click
-    toolHandler.startUse(canvas, event.x - offsetX, event.y - offsetY);
+    toolHandler.startUse(
+      layerHandler,
+      canvas,
+      event.x - offsetX,
+      event.y - offsetY,
+    );
   }
 
   // Handles tool usage as mouse moves around canvas
@@ -74,7 +80,7 @@
       const x = event.x - offsetX;
       const y = event.y - offsetY;
 
-      toolHandler.dragUse(canvas, x, y);
+      toolHandler.dragUse(layerHandler, canvas, x, y);
     }
   }
 
@@ -84,8 +90,13 @@
       isMouseDown = false;
 
       // Call tool's end functionality when mouse is released
-      toolHandler.endUse(canvas, event.x - offsetX, event.y - offsetY);
-      layers[index] = canvas
+      toolHandler.endUse(
+        layerHandler,
+        canvas,
+        event.x - offsetX,
+        event.y - offsetY,
+      );
+      layerHandler.layers[index] = canvas
         .getContext("2d")
         ?.getImageData(0, 0, width, height) as ImageData;
     }
