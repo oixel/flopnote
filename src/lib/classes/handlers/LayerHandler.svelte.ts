@@ -12,6 +12,6 @@ export default class LayerHandler {
         this.width = width;
         this.height = height;
 
-        this.layers = [new ImageData(width, height), new ImageData(width, height), new ImageData(width, height)];
+        this.layers = [new ImageData(width, height)];
     }
 }
