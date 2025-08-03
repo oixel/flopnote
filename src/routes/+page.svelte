@@ -47,10 +47,18 @@
         class="grow w-full mx-3 flex flex-col h-full justify-center items-end gap-2"
       >
         <h2 class="mr-2 font-bold">[ Layers ]</h2>
+        <button
+          onclick={() => {
+            layerHandler.layers.push(new ImageData(canvasWidth, canvasHeight));
+            layerHandler.activeLayerIndex;
+          }}
+          class="bg-white w-12 mr-4.5 pb-0.5 rounded-md cursor-pointer hover:border-1"
+          >+</button
+        >
         <!-- Layer Controls -->
         <div
-          style="width: {canvasWidth / 8 + 4}px;"
-          class="flex flex-col-reverse max-h-120 overflow-auto gap-1 mr-2.25"
+          style="width: {canvasWidth / 8 + 4}px; scrollbar-width: none;"
+          class="flex flex-col-reverse max-h-70 overflow-auto gap-1 mr-2.25"
         >
           {#each layerHandler.layers as _, index}
             <LayerPreview
@@ -62,6 +70,18 @@
             />
           {/each}
         </div>
+        <button
+          onclick={() => {
+            layerHandler.layers.unshift(
+              new ImageData(canvasWidth, canvasHeight),
+            );
+
+            // Ensure that selected layer remains selected
+            layerHandler.activeLayerIndex++;
+          }}
+          class="bg-white w-12 mr-4.5 pb-0.5 rounded-md cursor-pointer hover:border-1"
+          >+</button
+        >
       </div>
 
       <!-- The canvas which the user draws on -->
