@@ -1,15 +1,15 @@
 <script lang="ts">
-    import Layer from "./Layer.svelte";
-
     let {
-        width,
-        height,
+        canvasWidth,
+        canvasHeight,
+        scaler,
         layers = $bindable(),
         index,
         activeLayerIndex = $bindable(),
     }: {
-        width: number;
-        height: number;
+        canvasWidth: number;
+        canvasHeight: number;
+        scaler: number;
         layers: Array<ImageData>;
         index: number;
         activeLayerIndex: number;
@@ -20,22 +20,32 @@
     $effect(() => {
         if (canvas) {
             const context = canvas.getContext("2d") as CanvasRenderingContext2D;
-            context.clearRect(0, 0, width, height);
+            context.clearRect(0, 0, canvasWidth, canvasHeight);
 
-            //
+            // Create a temporary canvas to place the current layer's ImageData onto
             const tempCanvas: HTMLCanvasElement =
                 document.createElement("canvas");
-            tempCanvas.width = width * 8;
-            tempCanvas.height = height * 8;
+            tempCanvas.width = canvasWidth;
+            tempCanvas.height = canvasHeight;
 
-            //
+            // Draw the current layer's ImageData onto the temporary layer
             const tempContext = tempCanvas.getContext(
                 "2d",
             ) as CanvasRenderingContext2D;
             tempContext.putImageData(layers[index], 0, 0);
-            tempContext.scale(1 / 8, 1 / 8);
 
-            context.drawImage(tempCanvas, 0, 0);
+            // Render the content of the temporary layer scaled to the dimensions of the layer preview
+            context.drawImage(
+                tempCanvas,
+                0,
+                0,
+                canvasWidth,
+                canvasHeight,
+                0,
+                0,
+                canvas.width,
+                canvas.height,
+            );
         }
     });
 
@@ -81,9 +91,10 @@
         {/if}
     </div>
 {/if}
+
 <canvas
-    {width}
-    {height}
+    width={canvasWidth * scaler}
+    height={canvasHeight * scaler}
     bind:this={canvas}
     onclick={() => {
         activeLayerIndex = index;
