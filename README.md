@@ -1,5 +1,5 @@
 # Dev Instructions
-To run basic Svelte project use `npm run dev` to run in application (Tauri) mode use `npm run tauri.
+To run basic Svelte project use `npm run dev` to run in application (Tauri) mode use `npm run tauri dev`.
 
 # Current Goals
 ## Basic Drawing Functionality
