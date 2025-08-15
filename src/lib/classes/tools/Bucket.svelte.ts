@@ -9,7 +9,7 @@ import {
 } from "$lib/scripts/ColorTools";
 
 import type { CommandHandler } from "$lib/classes/handlers/CommandHandler";
-import type LayerHandler from "../handlers/LayerHandler.svelte";
+import LayerHandler from "$lib/classes/handlers/LayerHandler.svelte";
 
 // A combined iterative / recursive flood fill algorithm based on https://www.williammalone.com/articles/html5-canvas-javascript-paint-bucket-tool/
 function bucketFill(
@@ -31,7 +31,7 @@ function bucketFill(
   const visited = new Uint8Array(width * height);
 
   // Takes cartesian coordinate and converts it to linear coordinate for position in the visited array / canvas ImageData
-  const getIndex = (x: number, y: number): number => y * width + x;
+  const getIndex = (x: number, y: number): number => Math.floor(y) * width + Math.floor(x);
   const getPixelCoord = (x: number, y: number): number => getIndex(x, y) * 4;
 
   // Represents the pixel's coordinate (x, y) as a *linear* coordinate in the *linear* array of image data
