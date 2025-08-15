@@ -40,7 +40,7 @@
     setOffset();
   });
 
-  //
+  // If the contents of the layers change (e.g. a swap occurs), ensure that this layer has the updated ImageData
   $effect(() => {
     if (layerHandler.layers) {
       const context = canvas.getContext("2d");
