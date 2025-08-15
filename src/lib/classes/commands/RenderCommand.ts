@@ -17,10 +17,12 @@ export class RenderCommand extends Command {
 
     // Define redo and undo functions
     super(
+      // Redo
       function () {
         context.putImageData(newImageData, 0, 0);
         layerHandler.layers[activeLayerIndex] = newImageData;
       },
+      // Undo
       function () {
         context.putImageData(oldImageData, 0, 0);
         layerHandler.layers[activeLayerIndex] = oldImageData;
