@@ -10,30 +10,41 @@
         canvasWidth: number;
         canvasHeight: number;
     } = $props();
+
+    $effect(() => {
+        if (layerHandler.layers.length == 0) createLayer();
+    });
+
+    // Create a new layer above the currently selected layer and move up to it
+    function createLayer() {
+        // Create a new layer above the current layer
+        layerHandler.layers.push(new ImageData(canvasWidth, canvasHeight));
+
+        // Select this newly created layer
+    }
 </script>
 
-<div
-    class="grow w-full mx-3 flex flex-col h-full justify-center items-end gap-2"
->
-    <h2 class="mr-2 font-bold">[ Layers ]</h2>
-    <button
-        onclick={() => {
-            layerHandler.layers.push(new ImageData(canvasWidth, canvasHeight));
-            layerHandler.activeLayerIndex;
-        }}
-        class="bg-white w-12 mr-4.5 pb-0.5 rounded-md cursor-pointer hover:border-1"
-        >+</button
-    >
-    <!-- Layer Controls -->
+<div class="grow w-full mx-3 flex flex-col h-full justify-center items-end">
     <div
-        style="scrollbar-width: none;"
-        class="flex flex-col-reverse max-h-70 overflow-auto gap-1 mr-2.25 bg-red-200"
+        style="max-width: {canvasWidth / 4}px;"
+        class="flex w-full justify-center gap-2 bg-gray-800 p-2 rounded-t-md"
+    >
+        <h2 class="select-none font-bold text-xl grow text-white">Layers</h2>
+        <button
+            onclick={createLayer}
+            class="bg-white w-7 aspect-square rounded-md cursor-pointer hover:border-1 font-bold"
+            >+</button
+        >
+    </div>
+
+    <div
+        style="scrollbar-width: none; max-width: {canvasWidth / 4}px;"
+        class="flex flex-col-reverse max-h-70 overflow-auto gap-1 bg-gray-500 pt-2 pb-2 rounded-b-md"
     >
         {#each layerHandler.layers as _, index}
             <LayerPreview
                 {canvasWidth}
                 {canvasHeight}
-                scaler={1 / 8}
                 layers={layerHandler.layers}
                 {index}
                 bind:activeLayerIndex={layerHandler.activeLayerIndex}
