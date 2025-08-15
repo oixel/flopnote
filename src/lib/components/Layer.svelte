@@ -150,9 +150,11 @@
       // Turn off tool hovering when mouse exits the canvas' bounds
       isHovering = false;
     }}
-    class="absolute inset-0 rounded-md border-2 {tool?.cursor}  {selected
-      ? ''
-      : 'pointer-events-none'}"
+    class="
+    {tool?.cursor}  
+    {selected ? '' : 'pointer-events-none'}
+    
+    absolute inset-0 rounded-md border-2"
     style="{isBackground
       ? `background-color: ${toolHandler.backgroundColor};`
       : ''}
@@ -161,3 +163,5 @@
   >
   </canvas>
 {/if}
+
+<!-- {layerHandler.getVisibility(index) ? 'flex' : 'hidden'} -->

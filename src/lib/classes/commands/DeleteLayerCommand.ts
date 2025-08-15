@@ -15,8 +15,7 @@ export class DeleteLayerCommand extends Command {
         super(
             // Redo
             function () {
-                // Delete currently selected layer
-                layerHandler.layers.splice(index, 1);
+                layerHandler.deleteLayer(index);
 
                 // Prevent 0 layers from existing by creating a new layer when empty
                 if (layerHandler.layers.length === 0) {

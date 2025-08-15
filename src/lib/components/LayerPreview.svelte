@@ -64,9 +64,10 @@
                 new SelectLayerCommand(layerHandler, index),
             );
         }}
-        class="{layerHandler.activeLayerIndex == index
-            ? 'border-gray-800 border-4'
-            : ''} self-center justify-self-center w-9/10 aspect-square rounded-md bg-white cursor-pointer hover:border-2 hover:border-dashed"
+        class="
+        {layerHandler.activeLayerIndex == index ? ' border-4' : ''} 
+        {layerHandler.getVisibility(index) ? 'opacity-100' : 'opacity-50'}
+        self-center justify-self-center w-9/10 aspect-square rounded-md bg-white cursor-pointer border-0 border-gray-800 hover:border-2 hover:border-dashed"
     >
     </canvas>
 
@@ -124,9 +125,9 @@
                 <!-- Button to toggle the selected layer's visibility -->
                 <button
                     aria-label="Toggle layer's visibility"
-                    onclick={() => console.log("Toggled visibility")}
+                    onclick={() => layerHandler.toggleVisibility(index)}
                     class="relative z-1 w-8 bg-white border-2 rounded-md aspect-square cursor-pointer hover:scale-105"
-                    >🗹</button
+                    >{layerHandler.getVisibility(index) ? "🗹" : "☐"}</button
                 >
             </div>
         </div>

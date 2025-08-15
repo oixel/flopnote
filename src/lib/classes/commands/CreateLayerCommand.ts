@@ -14,8 +14,8 @@ export class CreateLayerCommand extends Command {
         super(
             // Redo
             function () {
-                // Create a new layer above the current layer
-                layerHandler.layers.splice(index, 0, new ImageData(layerHandler.width, layerHandler.height));
+                // Create a new layer at the desired index
+                layerHandler.addLayer(index);
 
                 // Select this newly created layer
                 layerHandler.activeLayerIndex = index;
