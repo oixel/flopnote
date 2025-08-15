@@ -43,7 +43,12 @@
     </h1>
     <div class="flex justify-center items-center bg-blue-200 h-full grow">
       <!-- Tools to the left of the canvas -->
-      <LayerControls {layerHandler} {canvasWidth} {canvasHeight} />
+      <LayerControls
+        {canvasWidth}
+        {canvasHeight}
+        {layerHandler}
+        {commandHandler}
+      />
 
       <!-- The canvas which the user draws on -->
       <div
