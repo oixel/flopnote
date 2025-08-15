@@ -46,7 +46,7 @@ export class PaintBrush extends Tool {
 
   // Draws out canvas content from before the brush stroke and then draws out current brush stroke on top
   // Do it this way rather than just drawing every move allows for brush strokes of different opacities
-  dragUse(_: LayerHandler, canvas: HTMLCanvasElement, x: number, y: number): void {
+  dragUse(_layerHandler: LayerHandler, canvas: HTMLCanvasElement, x: number, y: number): void {
     // Grab canvas' current context
     const context = canvas.getContext("2d") as CanvasRenderingContext2D;
 
