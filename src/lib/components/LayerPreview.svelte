@@ -47,20 +47,20 @@
         }
     });
 
-    //
+    // Swap the current layer with the layer above or below
     function swapLayer(direction: -1 | 1): void {
-        //
+        // Calculate the index where the current layer will swap to (for cleaner code)
         var swapIndex = index + direction;
 
         // Prevent attempting to swap two layers if not in bounds
         if (swapIndex < 0 || swapIndex >= layers.length) return;
 
-        //
+        // Swap the ImageData of the two layers
         const temp: ImageData = layers[swapIndex];
         layers[index + direction] = layers[index];
         layers[index] = temp;
 
-        //
+        // Re-select the previously selected layer at its new spot in the hierarchy
         activeLayerIndex = index + direction;
     }
 
@@ -78,8 +78,8 @@
             activeLayerIndex = index;
         }}
         class="{activeLayerIndex == index
-            ? 'border-red-500 border-4'
-            : ''} self-center justify-self-center w-9/10 aspect-square border-2 rounded-md bg-white cursor-pointer hover:border-dashed"
+            ? 'border-gray-800 border-4'
+            : ''} self-center justify-self-center w-9/10 aspect-square rounded-md bg-white cursor-pointer hover:border-2 hover:border-dashed"
     >
     </canvas>
 

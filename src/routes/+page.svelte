@@ -1,7 +1,6 @@
 <script lang="ts">
   import LayerHandler from "$lib/classes/handlers/LayerHandler.svelte";
   import Layer from "$lib/components/Layer.svelte";
-  import LayerPreview from "$lib/components/LayerPreview.svelte";
   import { ToolHandler } from "$lib/classes/handlers/ToolHandler.svelte";
   import ToolSettings from "$lib/components/ToolSettings.svelte";
   import { CommandHandler } from "$lib/classes/handlers/CommandHandler";
@@ -23,7 +22,7 @@
   // Instantiate an InputHandler to allow for keyboard shortcuts
   const inputHandler = new InputHandler(commandHandler, toolHandler);
 
-  //
+  // Instantiate a LayerHander to manage the data of all the different layers
   let layerHandler = new LayerHandler(canvasWidth, canvasHeight);
 </script>
 
