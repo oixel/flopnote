@@ -1,16 +1,22 @@
 <script lang="ts">
+    import type LayerHandler from "$lib/classes/handlers/LayerHandler.svelte";
+    import { SelectLayerCommand } from "$lib/classes/commands/SelectLayerCommand";
+    import type { CommandHandler } from "$lib/classes/handlers/CommandHandler";
+    import { DeleteLayerCommand } from "$lib/classes/commands/DeleteLayerCommand";
+    import { SwapLayerCommand } from "$lib/classes/commands/SwapLayerCommand";
+
     let {
         canvasWidth,
         canvasHeight,
-        layers = $bindable(),
+        layerHandler,
+        commandHandler,
         index,
-        activeLayerIndex = $bindable(),
     }: {
         canvasWidth: number;
         canvasHeight: number;
-        layers: Array<ImageData>;
+        layerHandler: LayerHandler;
+        commandHandler: CommandHandler;
         index: number;
-        activeLayerIndex: number;
     } = $props();
 
     let canvas: HTMLCanvasElement | undefined = $state();
@@ -30,7 +36,7 @@
             const tempContext = tempCanvas.getContext(
                 "2d",
             ) as CanvasRenderingContext2D;
-            tempContext.putImageData(layers[index], 0, 0);
+            tempContext.putImageData(layerHandler.layers[index], 0, 0);
 
             // Render the content of the temporary layer scaled to the dimensions of the layer preview
             context.drawImage(
@@ -46,28 +52,6 @@
             );
         }
     });
-
-    // Swap the current layer with the layer above or below
-    function swapLayer(direction: -1 | 1): void {
-        // Calculate the index where the current layer will swap to (for cleaner code)
-        var swapIndex = index + direction;
-
-        // Prevent attempting to swap two layers if not in bounds
-        if (swapIndex < 0 || swapIndex >= layers.length) return;
-
-        // Swap the ImageData of the two layers
-        const temp: ImageData = layers[swapIndex];
-        layers[index + direction] = layers[index];
-        layers[index] = temp;
-
-        // Re-select the previously selected layer at its new spot in the hierarchy
-        activeLayerIndex = index + direction;
-    }
-
-    // Delete currently selected layer
-    function deleteLayer() {
-        layers.splice(activeLayerIndex, 1);
-    }
 </script>
 
 <div class="relative group">
@@ -75,16 +59,19 @@
         style="max-width: {canvasWidth / 4}px;"
         bind:this={canvas}
         onclick={() => {
-            activeLayerIndex = index;
+            // Store layer selection in undo / redo timeline
+            commandHandler.addCommand(
+                new SelectLayerCommand(layerHandler, index),
+            );
         }}
-        class="{activeLayerIndex == index
+        class="{layerHandler.activeLayerIndex == index
             ? 'border-gray-800 border-4'
             : ''} self-center justify-self-center w-9/10 aspect-square rounded-md bg-white cursor-pointer hover:border-2 hover:border-dashed"
     >
     </canvas>
 
     <!-- Only show layer settings when hovering on the selected layer -->
-    {#if activeLayerIndex == index}
+    {#if layerHandler.activeLayerIndex == index}
         <div
             class="absolute inset-0 opacity-0 group-hover:opacity-100 w-full h-full flex justify-center items-center"
         >
@@ -93,15 +80,27 @@
                 <!-- Button to move selected layer up -->
                 <button
                     aria-label="Move layer {index} up one"
-                    onclick={() => swapLayer(1)}
-                    class="relative z-1 w-8 bg-white border-2 rounded-md aspect-square cursor-pointer hover:scale-105"
+                    disabled={index == layerHandler.layers.length - 1}
+                    onclick={() =>
+                        commandHandler.addCommand(
+                            new SwapLayerCommand(
+                                layerHandler,
+                                layerHandler.activeLayerIndex + 1,
+                            ),
+                        )}
+                    class="relative z-1 w-8 bg-white border-2 rounded-md aspect-square cursor-pointer
+                    hover:scale-105 disabled:opacity-50 disabled:cursor-default"
                     >↑</button
                 >
 
                 <!-- Button to delete selected layer -->
                 <button
                     aria-label="Move layer {index} down one"
-                    onclick={deleteLayer}
+                    onclick={() => {
+                        commandHandler.addCommand(
+                            new DeleteLayerCommand(layerHandler),
+                        );
+                    }}
                     class="relative z-1 w-8 bg-white border-2 rounded-md aspect-square cursor-pointer hover:scale-105"
                     >X</button
                 >
@@ -109,8 +108,16 @@
                 <!-- Button to move selected layer down -->
                 <button
                     aria-label="Move layer {index} down one"
-                    onclick={() => swapLayer(-1)}
-                    class="relative z-1 w-8 bg-white border-2 rounded-md aspect-square cursor-pointer hover:scale-105"
+                    disabled={index == 0}
+                    onclick={() =>
+                        commandHandler.addCommand(
+                            new SwapLayerCommand(
+                                layerHandler,
+                                layerHandler.activeLayerIndex - 1,
+                            ),
+                        )}
+                    class="relative z-1 w-8 bg-white border-2 rounded-md aspect-square cursor-pointer
+                    hover:scale-105 disabled:opacity-50 disabled:cursor-default"
                     >↓</button
                 >
 

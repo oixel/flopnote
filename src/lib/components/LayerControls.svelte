@@ -1,27 +1,19 @@
 <script lang="ts">
     import type LayerHandler from "$lib/classes/handlers/LayerHandler.svelte";
+    import type { CommandHandler } from "$lib/classes/handlers/CommandHandler";
     import LayerPreview from "./LayerPreview.svelte";
+    import { CreateLayerCommand } from "$lib/classes/commands/CreateLayerCommand";
     let {
-        layerHandler,
         canvasWidth,
         canvasHeight,
+        layerHandler,
+        commandHandler,
     }: {
-        layerHandler: LayerHandler;
         canvasWidth: number;
         canvasHeight: number;
+        layerHandler: LayerHandler;
+        commandHandler: CommandHandler;
     } = $props();
-
-    $effect(() => {
-        if (layerHandler.layers.length == 0) createLayer();
-    });
-
-    // Create a new layer above the currently selected layer and move up to it
-    function createLayer() {
-        // Create a new layer above the current layer
-        layerHandler.layers.push(new ImageData(canvasWidth, canvasHeight));
-
-        // Select this newly created layer
-    }
 </script>
 
 <div class="grow w-full mx-3 flex flex-col h-full justify-center items-end">
@@ -31,7 +23,9 @@
     >
         <h2 class="select-none font-bold text-xl grow text-white">Layers</h2>
         <button
-            onclick={createLayer}
+            onclick={() => {
+                commandHandler.addCommand(new CreateLayerCommand(layerHandler));
+            }}
             class="bg-white w-7 aspect-square rounded-md cursor-pointer hover:border-1 font-bold"
             >+</button
         >
@@ -45,9 +39,9 @@
             <LayerPreview
                 {canvasWidth}
                 {canvasHeight}
-                layers={layerHandler.layers}
+                {layerHandler}
+                {commandHandler}
                 {index}
-                bind:activeLayerIndex={layerHandler.activeLayerIndex}
             />
         {/each}
     </div>
