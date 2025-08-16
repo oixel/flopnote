@@ -4,6 +4,7 @@
     import type { CommandHandler } from "$lib/classes/handlers/CommandHandler";
     import { DeleteLayerCommand } from "$lib/classes/commands/DeleteLayerCommand";
     import { SwapLayerCommand } from "$lib/classes/commands/SwapLayerCommand";
+    import { ToggleVisibilityCommand } from "$lib/classes/commands/ToggleVisibilityCommand";
 
     let {
         canvasWidth,
@@ -129,7 +130,10 @@
                 <!-- Button to toggle the selected layer's visibility -->
                 <button
                     aria-label="Toggle layer's visibility"
-                    onclick={() => layerHandler.toggleVisibility(index)}
+                    onclick={() =>
+                        commandHandler.addCommand(
+                            new ToggleVisibilityCommand(layerHandler),
+                        )}
                     class="relative z-1 w-8 bg-white border-2 rounded-md aspect-square cursor-pointer hover:scale-105"
                     >{layerHandler.getVisibility(index) ? "🗹" : "☐"}</button
                 >
