@@ -1,12 +1,12 @@
 <script lang="ts">
-  import LayerHandler from "$lib/classes/handlers/LayerHandler.svelte";
-  import Layer from "$lib/components/Layer.svelte";
+  import { InputHandler } from "$lib/classes/handlers/InputHandler.svelte";
+  import { CommandHandler } from "$lib/classes/handlers/CommandHandler";
   import { ToolHandler } from "$lib/classes/handlers/ToolHandler.svelte";
   import ToolSettings from "$lib/components/ToolSettings.svelte";
-  import { CommandHandler } from "$lib/classes/handlers/CommandHandler";
-  import { InputHandler } from "$lib/classes/handlers/InputHandler.svelte";
   import ColorPicker from "$lib/components/ColorPicker.svelte";
   import RecentColors from "$lib/components/RecentColors.svelte";
+  import LayerHandler from "$lib/classes/handlers/LayerHandler.svelte";
+  import LayerCanvas from "$lib/components/LayerCanvas.svelte";
   import LayerControls from "$lib/components/LayerControls.svelte";
 
   // Define canvas dimensions
@@ -53,10 +53,10 @@
       <!-- The canvas which the user draws on -->
       <div
         style="min-width: {canvasWidth}px; min-height: {canvasHeight}px;"
-        class="relative bg-red-200"
+        class="relative"
       >
         <!-- Initialize background layer that cannot be colored on, but contains the set background color -->
-        <Layer
+        <LayerCanvas
           width={canvasWidth}
           height={canvasHeight}
           {toolHandler}
@@ -68,7 +68,7 @@
 
         <!-- Renders out all layers with stored ImageData -->
         {#each layerHandler.layers as _, index}
-          <Layer
+          <LayerCanvas
             width={canvasWidth}
             height={canvasHeight}
             {toolHandler}
