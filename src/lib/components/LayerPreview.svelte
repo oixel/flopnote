@@ -36,7 +36,11 @@
             const tempContext = tempCanvas.getContext(
                 "2d",
             ) as CanvasRenderingContext2D;
-            tempContext.putImageData(layerHandler.layers[index], 0, 0);
+            tempContext.putImageData(
+                layerHandler.layers[index].imageData,
+                0,
+                0,
+            );
 
             // Render the content of the temporary layer scaled to the dimensions of the layer preview
             context.drawImage(

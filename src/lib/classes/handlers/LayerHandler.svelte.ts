@@ -1,49 +1,35 @@
-import { SvelteMap } from "svelte/reactivity";
+import { Layer } from "$lib/classes/Layer.svelte";
 
 export default class LayerHandler {
     width: number = 0;
     height: number = 0;
 
     // Stores the ImageData of each layer and renders n layers, where n = quantity of ImageData
-    layers: Array<ImageData> = $state([]);
-
-    // Stores the visibility status of each layer
-    visibility: Map<ImageData, boolean> = $state(new SvelteMap());
+    layers: Array<Layer> = $state([]);
 
     // Stores the index of the currently selected layer in the layers array
     activeLayerIndex: number = $state(0);
 
-    // Create a new layer and ensures it has a visibility status
+    // Create a new layer and add it at given index
     addLayer(index: number): void {
-        const newImageData = new ImageData(this.width, this.height);
-        this.layers.splice(index, 0, newImageData);
-
-        // Create a visibility status for this layer
-        this.visibility.set(newImageData, true);
-
+        const newLayer = new Layer(this.width, this.height);
+        this.layers.splice(index, 0, newLayer);
     }
 
-    // Delete layer at given index and remove its visibility status
+    // Delete layer at given index
     deleteLayer(index: number): void {
-        const deletedImageData = this.layers.splice(index, 1);
-        this.visibility.delete(deletedImageData[0]);
-    }
-
-    //
-    updateKey(index: number): void {
-        this.visibility.set(this.layers[index], true);
-        console.log(this.visibility);
+        this.layers.splice(index, 1);
     }
 
     // Returns the visibility status of the layer at a given index or the active layer if none is given
     getVisibility(manualIndex: number | null = null): boolean {
         const index = (manualIndex != null) ? manualIndex : this.activeLayerIndex;
-        return this.visibility.get(this.layers[index]) as boolean;
+        return this.layers[index].visible;
     }
 
     // Toggle the visibility status of a specific layer
     toggleVisibility(index: number): void {
-        this.visibility.set(this.layers[index], !this.getVisibility(index));
+        this.layers[index].visible = !this.getVisibility(index);
     }
 
     constructor(width: number, height: number) {

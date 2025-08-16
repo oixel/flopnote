@@ -6,7 +6,7 @@ import { CreateLayerCommand } from "./CreateLayerCommand";
 export class DeleteLayerCommand extends Command {
     constructor(layerHandler: LayerHandler, manualIndex: number | null = null) {
         const index = (manualIndex) ? manualIndex : layerHandler.activeLayerIndex;
-        const imageData = layerHandler.layers[index];
+        const imageData = layerHandler.layers[index].imageData;
 
         // Tracks whether the layers became empty on deletion (ensures undo() does not create a unneeded duplicate)
         let wasEmpty = false;
@@ -34,7 +34,7 @@ export class DeleteLayerCommand extends Command {
                 if (!wasEmpty) new CreateLayerCommand(layerHandler, index);
 
                 // Fill the new layer with the deleted layer's ImageData
-                layerHandler.layers[index] = imageData;
+                layerHandler.layers[index].imageData = imageData;
             }
         );
 

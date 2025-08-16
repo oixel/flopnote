@@ -20,12 +20,12 @@ export class RenderCommand extends Command {
       // Redo
       function () {
         context.putImageData(newImageData, 0, 0);
-        layerHandler.layers[activeLayerIndex] = newImageData;
+        layerHandler.layers[activeLayerIndex].imageData = newImageData;
       },
       // Undo
       function () {
         context.putImageData(oldImageData, 0, 0);
-        layerHandler.layers[activeLayerIndex] = oldImageData;
+        layerHandler.layers[activeLayerIndex].imageData = oldImageData;
       }
     );
   }

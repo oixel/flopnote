@@ -9,9 +9,9 @@ export class SwapLayerCommand extends Command {
 
         function swap(indexA: number, indexB: number): void {
             // Swap the ImageData of the two layers
-            const temp: ImageData = layerHandler.layers[indexB];
-            layerHandler.layers[indexB] = layerHandler.layers[indexA];
-            layerHandler.layers[indexA] = temp;
+            const temp: ImageData = layerHandler.layers[indexB].imageData;
+            layerHandler.layers[indexB].imageData = layerHandler.layers[indexA].imageData;
+            layerHandler.layers[indexA].imageData = temp;
 
             // Re-select the previously selected layer at its new spot in the hierarchy
             layerHandler.activeLayerIndex = indexB;

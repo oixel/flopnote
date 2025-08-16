@@ -69,8 +69,6 @@ export class Tool {
     if (this.previousImageData && this.commandHandler) {
       const command = new RenderCommand(layerHandler, canvas, this.previousImageData);
       this.commandHandler.addCommand(command);
-
-      layerHandler.updateKey(layerHandler.activeLayerIndex);
     }
   }
 
