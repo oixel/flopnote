@@ -40,13 +40,12 @@
     setOffset();
   });
 
-  // If the contents of the layers change (e.g. a swap occurs), ensure that this layer has the updated ImageData
+  // If the contents of the layers change elsewhere (e.g. a swap occurs or undo delete), ensure that the canvas has the updated ImageData
   $effect(() => {
-    if (layerHandler.layers) {
-      const context = canvas.getContext("2d");
-      if (layerHandler.layers[index] instanceof ImageData) {
-        context?.putImageData(layerHandler.layers[index], 0, 0);
-      }
+    if (canvas) {
+      const context = canvas.getContext("2d") as CanvasRenderingContext2D;
+      context.clearRect(0, 0, width, height);
+      context.putImageData(layerHandler.layers[index].imageData, 0, 0);
     }
   });
 
@@ -96,9 +95,14 @@
         event.x - offsetX,
         event.y - offsetY,
       );
-      layerHandler.layers[index] = canvas
-        .getContext("2d")
-        ?.getImageData(0, 0, width, height) as ImageData;
+
+      const context = canvas.getContext("2d") as CanvasRenderingContext2D;
+      layerHandler.layers[index].imageData = context.getImageData(
+        0,
+        0,
+        width,
+        height,
+      );
     }
   }
 </script>
