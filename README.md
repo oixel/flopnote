@@ -15,7 +15,7 @@ To run basic Svelte project use `npm run dev` to run in application (Tauri) mode
 - [x] Recently used colors
 - [x] Proper undo / redo system (Command Handler)
 - [ ] Time lapse
-- [ ] Add layer support (max of 10 layers + 1 background)
+- [x] Add layer support
 ## Basic Animation Functionality
 - [ ] Creation of new frames
 - [ ] Basic animation playing
