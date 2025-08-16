@@ -42,7 +42,7 @@
 
   // If the contents of the layers change elsewhere (e.g. a swap occurs or undo delete), ensure that the canvas has the updated ImageData
   $effect(() => {
-    if (canvas) {
+    if (canvas && index != -1) {
       const context = canvas.getContext("2d") as CanvasRenderingContext2D;
       context.clearRect(0, 0, width, height);
       context.putImageData(layerHandler.layers[index].imageData, 0, 0);
@@ -155,6 +155,7 @@
       isHovering = false;
     }}
     class="
+    {index == -1 || layerHandler.getVisibility(index) ? 'flex' : 'hidden'}
     {tool?.cursor}  
     {selected ? '' : 'pointer-events-none'}
     
@@ -167,5 +168,3 @@
   >
   </canvas>
 {/if}
-
-<!-- {layerHandler.getVisibility(index) ? 'flex' : 'hidden'} -->
