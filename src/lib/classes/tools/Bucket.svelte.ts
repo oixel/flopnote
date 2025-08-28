@@ -1,5 +1,6 @@
 import { Tool } from "$lib/classes/Tool.svelte";
 import { Color } from "$lib/classes/Color";
+import { getIndex, getPixelCoord } from "$lib/scripts/ColorTools";
 
 import {
   hexToColor,
@@ -30,13 +31,9 @@ function bucketFill(
   // Fixed 8-bit unsigned integer, 0 by default (essentially a array of all coords defaulted to false)
   const visited = new Uint8Array(width * height);
 
-  // Takes cartesian coordinate and converts it to linear coordinate for position in the visited array / canvas ImageData
-  const getIndex = (x: number, y: number): number => Math.floor(y) * width + Math.floor(x);
-  const getPixelCoord = (x: number, y: number): number => getIndex(x, y) * 4;
-
   // Represents the pixel's coordinate (x, y) as a *linear* coordinate in the *linear* array of image data
   // Note: each value follows the structure of [red, green, blue, alpha, red, ...]
-  let coord = getPixelCoord(x, y);
+  let coord = getPixelCoord(width, x, y);
 
   const startColor: Color = getColor(imageData, coord);
 
@@ -47,7 +44,7 @@ function bucketFill(
 
     x = newPixel.x;
     y = newPixel.y;
-    coord = getPixelCoord(x, y); // Pixel's coordinates are linear since ImageData is a 1D array where each pixel is represented by 4 indexes for RGBA
+    coord = getPixelCoord(width, x, y); // Pixel's coordinates are linear since ImageData is a 1D array where each pixel is represented by 4 indexes for RGBA
 
     // Move to topmost pixel that matches the starting color
     while (
@@ -79,16 +76,16 @@ function bucketFill(
       setColor(imageData, coord, fillColor);
 
       // Mark the pixel as visited 
-      visited[getIndex(x, y)] = 1;
+      visited[getIndex(width, x, y)] = 1;
 
       // Check left neighboring pixel
       if (x > 0) {
         if (
           doColorsMatch(getColor(imageData, coord - 4), startColor, threshold)
         ) {
-          if (!reachedLeft && !visited[getIndex(x - 1, y)]) {
+          if (!reachedLeft && !visited[getIndex(width, x - 1, y)]) {
             pixelStack.push({ x: x - 1, y: y });
-            visited[getIndex(x - 1, y)] = 1;
+            visited[getIndex(width, x - 1, y)] = 1;
             reachedLeft = true;
           }
         } else if (reachedLeft) {
@@ -101,9 +98,9 @@ function bucketFill(
         if (
           doColorsMatch(getColor(imageData, coord + 4), startColor, threshold)
         ) {
-          if (!reachedRight && !visited[getIndex(x + 1, y)]) {
+          if (!reachedRight && !visited[getIndex(width, x + 1, y)]) {
             pixelStack.push({ x: x + 1, y: y });
-            visited[getIndex(x + 1, y)] = 1;
+            visited[getIndex(width, x + 1, y)] = 1;
             reachedRight = true;
           }
         } else if (reachedRight) {

@@ -1,5 +1,14 @@
 import { Color } from "$lib/classes/Color";
 
+// Takes cartesian coordinate and converts it to linear coordinate for position in the visited array / canvas ImageData
+export function getIndex(width: number, x: number, y: number): number {
+  return Math.floor(y) * width + Math.floor(x);
+}
+
+export function getPixelCoord(width: number, x: number, y: number): number {
+  return getIndex(width, x, y) * 4;
+}
+
 // Converts a hex string (used by color input) and alpha value into a Color object
 export function hexToColor(hex: string, alpha: number): Color {
   // Remove hashtag if it is present in hex string
