@@ -14,7 +14,6 @@ To run basic Svelte project use `npm run dev` to run in application (Tauri) mode
 - [x] Add brush hovering over canvas
 - [x] Recently used colors
 - [x] Proper undo / redo system (Command Handler)
-- [ ] Time lapse
 - [x] Add layer support
 ## Basic Animation Functionality
 - [ ] Creation of new frames
@@ -23,6 +22,7 @@ To run basic Svelte project use `npm run dev` to run in application (Tauri) mode
 - [ ] Changeable FPS
 - [ ] Onion skinning
 ## Advanced Features
+- [ ] Time lapse
 - [ ] Audio support
   - [ ] Audio recording
   - [ ] Audio importing
