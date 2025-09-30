@@ -56,7 +56,7 @@ export function getColorXY(
   x: number,
   y: number
 ): Color {
-  const context = canvas.getContext("2d") as CanvasRenderingContext2D;
+  const context = canvas.getContext("2d", { willReadFrequently: true }) as CanvasRenderingContext2D;
   const imageData = context.getImageData(x, y, 1, 1).data;
 
   return new Color(imageData[0], imageData[1], imageData[2], imageData[3]);

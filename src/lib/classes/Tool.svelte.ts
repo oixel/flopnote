@@ -54,7 +54,7 @@ export class Tool {
 
   // Grab image data BEFORE using tool to allow for RenderCommand's undo()
   storePreviousImageData(canvas: HTMLCanvasElement): void {
-    const context = canvas.getContext("2d") as CanvasRenderingContext2D;
+    const context = canvas.getContext("2d", { willReadFrequently: true }) as CanvasRenderingContext2D;
 
     this.previousImageData = context.getImageData(
       0,

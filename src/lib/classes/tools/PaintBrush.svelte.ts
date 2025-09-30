@@ -25,7 +25,7 @@ export class PaintBrush extends Tool {
   startUse(layerHandler: LayerHandler, canvas: HTMLCanvasElement, x: number, y: number): void {
     this.storePreviousImageData(canvas);
 
-    const context = canvas.getContext("2d") as CanvasRenderingContext2D;
+    const context = canvas.getContext("2d", { willReadFrequently: true }) as CanvasRenderingContext2D;
 
     // Update brush's update
     context.globalAlpha = this.opacity / 255;
@@ -48,7 +48,7 @@ export class PaintBrush extends Tool {
   // Do it this way rather than just drawing every move allows for brush strokes of different opacities
   dragUse(_layerHandler: LayerHandler, canvas: HTMLCanvasElement, x: number, y: number): void {
     // Grab canvas' current context
-    const context = canvas.getContext("2d") as CanvasRenderingContext2D;
+    const context = canvas.getContext("2d", { willReadFrequently: true }) as CanvasRenderingContext2D;
 
     // Append new brush stroke points
     this.brushStroke.push({

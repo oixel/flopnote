@@ -4,7 +4,7 @@ import type LayerHandler from "../handlers/LayerHandler.svelte";
 // Handles rendering image data to screen
 export class RenderCommand extends Command {
   constructor(layerHandler: LayerHandler, canvas: HTMLCanvasElement, oldImageData: ImageData) {
-    const context = canvas.getContext("2d") as CanvasRenderingContext2D;
+    const context = canvas.getContext("2d", { willReadFrequently: true }) as CanvasRenderingContext2D;
     const newImageData: ImageData = context.getImageData(
       0,
       0,

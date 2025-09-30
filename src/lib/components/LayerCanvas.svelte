@@ -43,7 +43,9 @@
   // If the contents of the layers change elsewhere (e.g. a swap occurs or undo delete), ensure that the canvas has the updated ImageData
   $effect(() => {
     if (canvas && index != -1) {
-      const context = canvas.getContext("2d") as CanvasRenderingContext2D;
+      const context = canvas.getContext("2d", {
+        willReadFrequently: true,
+      }) as CanvasRenderingContext2D;
       context.clearRect(0, 0, width, height);
       context.putImageData(layerHandler.layers[index].imageData, 0, 0);
     }
@@ -96,7 +98,9 @@
         event.y - offsetY,
       );
 
-      const context = canvas.getContext("2d") as CanvasRenderingContext2D;
+      const context = canvas.getContext("2d", {
+        willReadFrequently: true,
+      }) as CanvasRenderingContext2D;
       layerHandler.layers[index].imageData = context.getImageData(
         0,
         0,

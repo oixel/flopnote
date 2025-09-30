@@ -23,7 +23,7 @@ function bucketFill(
   // Store canvas data in variables for cleaner code
   const width = canvas.width;
   const height = canvas.height;
-  const context = canvas.getContext("2d") as CanvasRenderingContext2D;
+  const context = canvas.getContext("2d", { willReadFrequently: true }) as CanvasRenderingContext2D;
 
   const pixelStack = [{ x, y }];
   const imageData = context.getImageData(0, 0, width, height);

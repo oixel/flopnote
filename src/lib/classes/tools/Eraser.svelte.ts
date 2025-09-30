@@ -14,7 +14,7 @@ export class Eraser extends Tool {
 
   // Clear canvas' pixel colors within current shape at given position
   erase(canvas: HTMLCanvasElement, x: number, y: number): void {
-    const context = canvas.getContext("2d") as CanvasRenderingContext2D;
+    const context = canvas.getContext("2d", { willReadFrequently: true }) as CanvasRenderingContext2D;
 
     // Erases based on currently selected shape
     if (this.isCircle) {

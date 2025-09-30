@@ -24,7 +24,9 @@
 
     $effect(() => {
         if (canvas) {
-            const context = canvas.getContext("2d") as CanvasRenderingContext2D;
+            const context = canvas.getContext("2d", {
+                willReadFrequently: true,
+            }) as CanvasRenderingContext2D;
             context.clearRect(0, 0, canvasWidth, canvasHeight);
 
             // Create a temporary canvas to place the current layer's ImageData onto
@@ -34,9 +36,9 @@
             tempCanvas.height = canvasHeight;
 
             // Draw the current layer's ImageData onto the temporary layer
-            const tempContext = tempCanvas.getContext(
-                "2d",
-            ) as CanvasRenderingContext2D;
+            const tempContext = tempCanvas.getContext("2d", {
+                willReadFrequently: true,
+            }) as CanvasRenderingContext2D;
             tempContext.putImageData(
                 layerHandler.layers[index].imageData,
                 0,
